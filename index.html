@@ -2,19 +2,51 @@
 <html lang="sv">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Moodflow Dynamic</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        * {
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+        }
+        
+        input, textarea {
+            -webkit-user-select: text;
+            user-select: text;
+        }
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        
         body { 
             background-color: #0f172a; 
             color: white; 
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             -webkit-tap-highlight-color: transparent;
+            position: fixed;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
         }
+        
         .card { background-color: #1e293b; border-radius: 1.5rem; }
-        .page { display: none; padding-bottom: 120px; animation: fadeIn 0.2s ease; }
+        .page { 
+            display: none; 
+            padding-bottom: 100px; 
+            animation: fadeIn 0.2s ease; 
+            overflow-y: auto;
+            overflow-x: hidden;
+            height: calc(100vh - 100px);
+            -webkit-overflow-scrolling: touch;
+        }
         .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
@@ -24,25 +56,26 @@
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            gap: 8px;
-            padding: 8px;
+            gap: 6px;
+            padding: 6px;
             border-radius: 12px;
             transition: all 0.2s ease;
             background: rgba(30, 41, 59, 0.5);
+            min-width: 0;
         }
         .day-col:hover {
             background: rgba(30, 41, 59, 0.8);
             transform: translateY(-2px);
         }
         .dot { 
-            width: 6px; 
-            height: 6px; 
+            width: 5px; 
+            height: 5px; 
             background-color: #334155; 
             border-radius: 9999px; 
         }
         .today-circle { 
-            width: 36px; 
-            height: 36px; 
+            width: 32px; 
+            height: 32px; 
             border-radius: 50%; 
             border: 2px solid #22c55e; 
             display: flex; 
@@ -50,19 +83,19 @@
             justify-content: center; 
             color: #4ade80; 
             font-weight: bold; 
-            font-size: 0.875rem;
+            font-size: 0.75rem;
             background: rgba(34, 197, 94, 0.15);
             box-shadow: 0 0 12px rgba(34, 197, 94, 0.3);
         }
         .mood-box {
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 0.875rem;
+            font-size: 0.75rem;
             transition: all 0.2s ease;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
@@ -70,177 +103,200 @@
             transform: scale(1.1);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
         }
+        
+        /* Navigerings-bar */
+        nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            padding-bottom: max(10px, env(safe-area-inset-bottom, 0));
+            z-index: 50;
+        }
+        
+        /* Mood-knappar */
+        .mood-btn {
+            min-width: 44px !important;
+            min-height: 44px !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Aktivitets-knappar */
+        .activity-btn {
+            min-height: 44px !important;
+        }
     </style>
 </head>
 <body>
 
-    <div id="home" class="page active p-6">
-        <header class="mb-8">
-            <h1 class="text-4xl font-bold mb-1" id="greeting">God kväll</h1>
-            <p id="current-full-date" class="text-slate-400">Måndag 16 feb</p>
+    <div id="home" class="page active p-4">
+        <header class="mb-6">
+            <h1 class="text-3xl font-bold mb-1" id="greeting">God kväll</h1>
+            <p id="current-full-date" class="text-sm text-slate-400">Måndag 16 feb</p>
         </header>
 
-        <div class="grid grid-cols-3 gap-4 mb-8">
-            <div class="card p-4 flex flex-col items-center">
-                <i class="fa-solid fa-fire text-teal-400 mb-2"></i>
+        <div class="grid grid-cols-3 gap-3 mb-6">
+            <div class="card p-3 flex flex-col items-center justify-center min-h-[90px]">
+                <i class="fa-solid fa-fire text-teal-400 mb-2 text-lg"></i>
                 <span class="text-2xl font-bold" id="stat-streak">0</span>
-                <span class="text-[10px] text-slate-500 uppercase font-bold">Rad</span>
+                <span class="text-[9px] text-slate-500 uppercase font-bold">Rad</span>
             </div>
-            <div class="card p-4 flex flex-col items-center">
-                <i class="fa-solid fa-chart-line text-orange-400 mb-2"></i>
+            <div class="card p-3 flex flex-col items-center justify-center min-h-[90px]">
+                <i class="fa-solid fa-chart-line text-orange-400 mb-2 text-lg"></i>
                 <span class="text-2xl font-bold" id="stat-today">-</span>
-                <span class="text-[10px] text-slate-500 uppercase font-bold">Snitt idag</span>
+                <span class="text-[9px] text-slate-500 uppercase font-bold">Snitt</span>
             </div>
-            <div class="card p-4 flex flex-col items-center">
-                <i class="fa-solid fa-calendar-check text-red-400 mb-2"></i>
+            <div class="card p-3 flex flex-col items-center justify-center min-h-[90px]">
+                <i class="fa-solid fa-calendar-check text-red-400 mb-2 text-lg"></i>
                 <span class="text-2xl font-bold" id="stat-total">0</span>
-                <span class="text-[10px] text-slate-500 uppercase font-bold">Loggar</span>
+                <span class="text-[9px] text-slate-500 uppercase font-bold">Loggar</span>
             </div>
         </div>
 
-        <div class="card p-6 mb-8">
-            <div class="flex justify-between items-center mb-6">
-                <button onclick="navigateWeek(-1)" class="text-slate-600 hover:text-slate-400 transition hover:scale-110"><i class="fa-solid fa-chevron-left"></i></button>
-                <span id="calendar-week-range" class="font-bold text-sm text-slate-300">9 - 15 Feb</span>
-                <button onclick="navigateWeek(1)" class="text-slate-600 hover:text-slate-400 transition hover:scale-110"><i class="fa-solid fa-chevron-right"></i></button>
+        <div class="card p-4 mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <button onclick="navigateWeek(-1)" class="text-slate-600 hover:text-slate-400 transition hover:scale-110 p-2" style="min-width: 44px; min-height: 44px;"><i class="fa-solid fa-chevron-left"></i></button>
+                <span id="calendar-week-range" class="font-bold text-xs text-slate-300 text-center">9 - 15 Feb</span>
+                <button onclick="navigateWeek(1)" class="text-slate-600 hover:text-slate-400 transition hover:scale-110 p-2" style="min-width: 44px; min-height: 44px;"><i class="fa-solid fa-chevron-right"></i></button>
             </div>
             <div id="calendar-days" class="flex justify-between gap-1">
-                </div>
+            </div>
         </div>
 
-        <h2 class="text-xl font-bold mb-4">Senaste loggar</h2>
-        <div id="logs-list" class="flex flex-col gap-3">
-            <p class="text-slate-600 italic text-sm text-center py-4">Inga loggar sparade ännu.</p>
+        <h2 class="text-lg font-bold mb-3">Senaste loggar</h2>
+        <div id="logs-list" class="flex flex-col gap-2 pb-4">
+            <p class="text-slate-600 italic text-xs text-center py-4">Inga loggar sparade ännu.</p>
         </div>
     </div>
 
-    <div id="log" class="page p-6">
-        <h1 class="text-3xl font-bold mb-1">Logga humor</h1>
-        <p class="text-slate-400 mb-8">Hur mår du just nu?</p>
+    <div id="log" class="page p-4">
+        <h1 class="text-2xl font-bold mb-1">Logga humor</h1>
+        <p class="text-xs text-slate-400 mb-6">Hur mår du just nu?</p>
         
-        <div class="card p-8 text-center mb-8">
-            <div class="mb-8">
-                <span class="text-6xl" id="mood-emoji">😐</span>
+        <div class="card p-6 text-center mb-6">
+            <div class="mb-6">
+                <span class="text-5xl" id="mood-emoji">😐</span>
             </div>
-            <div class="flex flex-wrap justify-center gap-3 mb-6">
-                <button onclick="selectMood(1)" class="mood-btn w-12 h-12 rounded-full bg-red-900/50 border-2 border-red-700 text-lg font-bold hover:bg-red-800 transition" data-mood="1" title="Väldigt dåligt">😢</button>
-                <button onclick="selectMood(2)" class="mood-btn w-12 h-12 rounded-full bg-red-700/50 border-2 border-red-600 text-lg font-bold hover:bg-red-600 transition" data-mood="2" title="Dåligt">😞</button>
-                <button onclick="selectMood(3)" class="mood-btn w-12 h-12 rounded-full bg-orange-900/50 border-2 border-orange-700 text-lg font-bold hover:bg-orange-800 transition" data-mood="3" title="Mycket dåligt">😔</button>
-                <button onclick="selectMood(4)" class="mood-btn w-12 h-12 rounded-full bg-orange-700/50 border-2 border-orange-600 text-lg font-bold hover:bg-orange-600 transition" data-mood="4" title="Ganska dåligt">😠</button>
-                <button onclick="selectMood(5)" class="mood-btn w-12 h-12 rounded-full bg-yellow-700/50 border-2 border-yellow-600 text-lg font-bold hover:bg-yellow-600 transition" data-mood="5" title="Dåligt">😕</button>
-                <button onclick="selectMood(6)" class="mood-btn w-12 h-12 rounded-full bg-yellow-600/50 border-2 border-yellow-500 text-lg font-bold hover:bg-yellow-500 transition" data-mood="6" title="Neutralt">😐</button>
-                <button onclick="selectMood(7)" class="mood-btn w-12 h-12 rounded-full bg-lime-600/50 border-2 border-lime-500 text-lg font-bold hover:bg-lime-500 transition" data-mood="7" title="Ganska bra">🙂</button>
-                <button onclick="selectMood(8)" class="mood-btn w-12 h-12 rounded-full bg-green-600/50 border-2 border-green-500 text-lg font-bold hover:bg-green-500 transition" data-mood="8" title="Bra">😊</button>
-                <button onclick="selectMood(9)" class="mood-btn w-12 h-12 rounded-full bg-green-700/50 border-2 border-green-600 text-lg font-bold hover:bg-green-600 transition" data-mood="9" title="Mycket bra">😄</button>
-                <button onclick="selectMood(10)" class="mood-btn w-12 h-12 rounded-full bg-green-800/50 border-2 border-green-700 text-lg font-bold hover:bg-green-700 transition" data-mood="10" title="Utmärkt">🤩</button>
+            <div class="flex flex-wrap justify-center gap-2 mb-4">
+                <button onclick="selectMood(1)" class="mood-btn w-11 h-11 rounded-full bg-red-900/50 border-2 border-red-700 text-base font-bold hover:bg-red-800 transition" data-mood="1" title="Väldigt dåligt">😢</button>
+                <button onclick="selectMood(2)" class="mood-btn w-11 h-11 rounded-full bg-red-700/50 border-2 border-red-600 text-base font-bold hover:bg-red-600 transition" data-mood="2" title="Dåligt">😞</button>
+                <button onclick="selectMood(3)" class="mood-btn w-11 h-11 rounded-full bg-orange-900/50 border-2 border-orange-700 text-base font-bold hover:bg-orange-800 transition" data-mood="3" title="Mycket dåligt">😔</button>
+                <button onclick="selectMood(4)" class="mood-btn w-11 h-11 rounded-full bg-orange-700/50 border-2 border-orange-600 text-base font-bold hover:bg-orange-600 transition" data-mood="4" title="Ganska dåligt">😠</button>
+                <button onclick="selectMood(5)" class="mood-btn w-11 h-11 rounded-full bg-yellow-700/50 border-2 border-yellow-600 text-base font-bold hover:bg-yellow-600 transition" data-mood="5" title="Dåligt">😕</button>
+                <button onclick="selectMood(6)" class="mood-btn w-11 h-11 rounded-full bg-yellow-600/50 border-2 border-yellow-500 text-base font-bold hover:bg-yellow-500 transition" data-mood="6" title="Neutralt">😐</button>
+                <button onclick="selectMood(7)" class="mood-btn w-11 h-11 rounded-full bg-lime-600/50 border-2 border-lime-500 text-base font-bold hover:bg-lime-500 transition" data-mood="7" title="Ganska bra">🙂</button>
+                <button onclick="selectMood(8)" class="mood-btn w-11 h-11 rounded-full bg-green-600/50 border-2 border-green-500 text-base font-bold hover:bg-green-500 transition" data-mood="8" title="Bra">😊</button>
+                <button onclick="selectMood(9)" class="mood-btn w-11 h-11 rounded-full bg-green-700/50 border-2 border-green-600 text-base font-bold hover:bg-green-600 transition" data-mood="9" title="Mycket bra">😄</button>
+                <button onclick="selectMood(10)" class="mood-btn w-11 h-11 rounded-full bg-green-800/50 border-2 border-green-700 text-base font-bold hover:bg-green-700 transition" data-mood="10" title="Utmärkt">🤩</button>
             </div>
         </div>
 
-        <div class="mb-8">
-            <h2 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Aktiviteter</h2>
+        <div class="mb-6">
+            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Aktiviteter</h2>
             <div class="grid grid-cols-2 gap-2">
-                <button onclick="toggleActivity('Träning')" class="activity-btn h-12 rounded-xl bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-sm font-medium" data-activity="Träning">
-                    <i class="fa-solid fa-dumbbell mr-2"></i>Träning
+                <button onclick="toggleActivity('Träning')" class="activity-btn rounded-lg bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-xs font-medium p-3" data-activity="Träning">
+                    <i class="fa-solid fa-dumbbell mr-1"></i>Träning
                 </button>
-                <button onclick="toggleActivity('Jobb')" class="activity-btn h-12 rounded-xl bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-sm font-medium" data-activity="Jobb">
-                    <i class="fa-solid fa-briefcase mr-2"></i>Jobb
+                <button onclick="toggleActivity('Jobb')" class="activity-btn rounded-lg bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-xs font-medium p-3" data-activity="Jobb">
+                    <i class="fa-solid fa-briefcase mr-1"></i>Jobb
                 </button>
-                <button onclick="toggleActivity('Socialt')" class="activity-btn h-12 rounded-xl bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-sm font-medium" data-activity="Socialt">
-                    <i class="fa-solid fa-handshake mr-2"></i>Socialt
+                <button onclick="toggleActivity('Socialt')" class="activity-btn rounded-lg bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-xs font-medium p-3" data-activity="Socialt">
+                    <i class="fa-solid fa-handshake mr-1"></i>Socialt
                 </button>
-                <button onclick="toggleActivity('Somn')" class="activity-btn h-12 rounded-xl bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-sm font-medium" data-activity="Somn">
-                    <i class="fa-solid fa-moon mr-2"></i>Somn
+                <button onclick="toggleActivity('Somn')" class="activity-btn rounded-lg bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-xs font-medium p-3" data-activity="Somn">
+                    <i class="fa-solid fa-moon mr-1"></i>Somn
                 </button>
-                <button onclick="toggleActivity('Mat')" class="activity-btn h-12 rounded-xl bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-sm font-medium" data-activity="Mat">
-                    <i class="fa-solid fa-utensils mr-2"></i>Mat
+                <button onclick="toggleActivity('Mat')" class="activity-btn rounded-lg bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-xs font-medium p-3" data-activity="Mat">
+                    <i class="fa-solid fa-utensils mr-1"></i>Mat
                 </button>
-                <button onclick="toggleActivity('Natur')" class="activity-btn h-12 rounded-xl bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-sm font-medium" data-activity="Natur">
-                    <i class="fa-solid fa-tree mr-2"></i>Natur
+                <button onclick="toggleActivity('Natur')" class="activity-btn rounded-lg bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-xs font-medium p-3" data-activity="Natur">
+                    <i class="fa-solid fa-tree mr-1"></i>Natur
                 </button>
-                <button onclick="toggleActivity('Musik')" class="activity-btn h-12 rounded-xl bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-sm font-medium" data-activity="Musik">
-                    <i class="fa-solid fa-music mr-2"></i>Musik
+                <button onclick="toggleActivity('Musik')" class="activity-btn rounded-lg bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-xs font-medium p-3" data-activity="Musik">
+                    <i class="fa-solid fa-music mr-1"></i>Musik
                 </button>
-                <button onclick="toggleActivity('Läsning')" class="activity-btn h-12 rounded-xl bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-sm font-medium" data-activity="Läsning">
-                    <i class="fa-solid fa-book mr-2"></i>Läsning
+                <button onclick="toggleActivity('Läsning')" class="activity-btn rounded-lg bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-xs font-medium p-3" data-activity="Läsning">
+                    <i class="fa-solid fa-book mr-1"></i>Läsning
                 </button>
-                <button onclick="toggleActivity('Meditation')" class="activity-btn h-12 rounded-xl bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-sm font-medium" data-activity="Meditation">
-                    <i class="fa-solid fa-om mr-2"></i>Meditation
+                <button onclick="toggleActivity('Meditation')" class="activity-btn rounded-lg bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-xs font-medium p-3" data-activity="Meditation">
+                    <i class="fa-solid fa-om mr-1"></i>Meditation
                 </button>
-                <button onclick="toggleActivity('Familj')" class="activity-btn h-12 rounded-xl bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-sm font-medium" data-activity="Familj">
-                    <i class="fa-solid fa-people-group mr-2"></i>Familj
+                <button onclick="toggleActivity('Familj')" class="activity-btn rounded-lg bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-xs font-medium p-3" data-activity="Familj">
+                    <i class="fa-solid fa-people-group mr-1"></i>Familj
                 </button>
-                <button onclick="toggleActivity('Resor')" class="activity-btn h-12 rounded-xl bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-sm font-medium" data-activity="Resor">
-                    <i class="fa-solid fa-suitcase mr-2"></i>Resor
+                <button onclick="toggleActivity('Resor')" class="activity-btn rounded-lg bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-xs font-medium p-3" data-activity="Resor">
+                    <i class="fa-solid fa-suitcase mr-1"></i>Resor
                 </button>
-                <button onclick="toggleActivity('Spel')" class="activity-btn h-12 rounded-xl bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-sm font-medium" data-activity="Spel">
-                    <i class="fa-solid fa-gamepad mr-2"></i>Spel
+                <button onclick="toggleActivity('Spel')" class="activity-btn rounded-lg bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-xs font-medium p-3" data-activity="Spel">
+                    <i class="fa-solid fa-gamepad mr-1"></i>Spel
                 </button>
             </div>
         </div>
 
-        <div class="mb-8">
-            <h2 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Anteckning</h2>
-            <div class="card p-4">
-                <textarea id="log-note" placeholder="Skriv en kort anteckning (valfritt)..." class="w-full bg-slate-800 border border-slate-700 rounded-lg p-4 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none" rows="4"></textarea>
+        <div class="mb-6">
+            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Anteckning</h2>
+            <div class="card p-3">
+                <textarea id="log-note" placeholder="Skriv en kort anteckning (valfritt)..." class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none text-sm" rows="3"></textarea>
                 <div class="text-xs text-slate-500 mt-2 text-right"><span id="note-count">0</span>/500</div>
             </div>
         </div>
 
-        <button onclick="addLog()" id="save-btn" disabled class="w-full bg-slate-400 text-slate-900 font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed hover:enabled:bg-slate-200">
+        <button onclick="addLog()" id="save-btn" disabled class="w-full bg-slate-400 text-slate-900 font-bold py-3 rounded-xl shadow-lg active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed hover:enabled:bg-slate-200 text-sm mb-4">
             <i class="fa-solid fa-check mr-2"></i>Spara
         </button>
     </div>
 
-    <div id="stats" class="page p-6">
-        <h1 class="text-3xl font-bold mb-8">Statistik</h1>
+    <div id="stats" class="page p-4">
+        <h1 class="text-2xl font-bold mb-6">Statistik</h1>
         
-        <div class="grid grid-cols-3 gap-3 mb-8">
-            <div class="card p-4 flex flex-col items-center">
-                <span class="text-xs text-slate-500 uppercase font-bold mb-2">7 dagar</span>
-                <span class="text-2xl font-bold text-green-400" id="stats-avg-7d">-</span>
-                <span class="text-[9px] text-slate-600">Höger</span>
+        <div class="grid grid-cols-3 gap-2 mb-6">
+            <div class="card p-3 flex flex-col items-center justify-center min-h-[80px]">
+                <span class="text-xs text-slate-500 uppercase font-bold mb-1">7 dagar</span>
+                <span class="text-xl font-bold text-green-400" id="stats-avg-7d">-</span>
+                <span class="text-[8px] text-slate-600">Snitt</span>
             </div>
-            <div class="card p-4 flex flex-col items-center">
-                <span class="text-xs text-slate-500 uppercase font-bold mb-2">30 dagar</span>
-                <span class="text-2xl font-bold text-green-400" id="stats-avg-30d">-</span>
-                <span class="text-[9px] text-slate-600">Höger</span>
+            <div class="card p-3 flex flex-col items-center justify-center min-h-[80px]">
+                <span class="text-xs text-slate-500 uppercase font-bold mb-1">30 dagar</span>
+                <span class="text-xl font-bold text-green-400" id="stats-avg-30d">-</span>
+                <span class="text-[8px] text-slate-600">Snitt</span>
             </div>
-            <div class="card p-4 flex flex-col items-center">
-                <span class="text-xs text-slate-500 uppercase font-bold mb-2">Totalt</span>
-                <span class="text-2xl font-bold text-green-400" id="stats-total">0</span>
-                <span class="text-[9px] text-slate-600">Logg(ar)</span>
+            <div class="card p-3 flex flex-col items-center justify-center min-h-[80px]">
+                <span class="text-xs text-slate-500 uppercase font-bold mb-1">Totalt</span>
+                <span class="text-xl font-bold text-green-400" id="stats-total">0</span>
+                <span class="text-[8px] text-slate-600">Logg(ar)</span>
             </div>
         </div>
 
-        <h2 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Humörfördelning</h2>
-        <div class="card p-6 mb-8">
-            <div id="stats-mood-distribution" class="flex items-end justify-between gap-1 h-32"></div>
+        <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Humörfördelning</h2>
+        <div class="card p-4 mb-6">
+            <div id="stats-mood-distribution" class="flex items-end justify-between gap-0.5 h-24"></div>
         </div>
 
-        <h2 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Aktiviteter & Humör</h2>
-        <div class="card p-6 mb-8" id="stats-activities-view"></div>
+        <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3" id="activities-heading">Aktiviteter & Humör</h2>
+        <div class="card p-4 mb-6" id="stats-activities-view"></div>
 
-        <div class="flex items-start gap-3 bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
-            <i class="fa-solid fa-lightbulb text-blue-400 mt-1"></i>
+        <div class="flex items-start gap-2 bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 pb-4">
+            <i class="fa-solid fa-lightbulb text-blue-400 mt-0.5 text-sm flex-shrink-0"></i>
             <div>
-                <h3 class="font-bold text-white mb-1">Insikter</h3>
-                <p class="text-sm text-slate-400" id="stats-insight">Logga mer data för insikter...</p>
+                <h3 class="font-bold text-white mb-1 text-sm">Insikter</h3>
+                <p class="text-xs text-slate-400" id="stats-insight">Logga mer data för insikter...</p>
             </div>
         </div>
     </div>
 
-    <div id="more" class="page p-6">
-        <h1 class="text-3xl font-bold mb-8">Inställningar</h1>
-        
+    <div id="more" class="page p-4">
+        <h1 class="text-2xl font-bold mb-6">Inställningar</h1>
 
-        
-        <div class="mb-8">
-            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Data</h2>
+        <div class="mb-6">
+            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Data</h2>
             <button onclick="exportToCSV()" class="card w-full p-4 flex items-center justify-between hover:bg-slate-700/50 transition">
                 <div class="flex items-center gap-3">
                     <i class="fa-solid fa-download text-green-400 text-lg"></i>
                     <div class="text-left">
-                        <div class="font-bold text-white">Exportera CSV</div>
+                        <div class="font-bold text-white text-sm">Exportera CSV</div>
                         <div class="text-xs text-slate-500">Loggrar</div>
                     </div>
                 </div>
@@ -248,24 +304,24 @@
             </button>
         </div>
 
-        <div class="mb-8">
-            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Sekretes</h2>
+        <div class="mb-6">
+            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Sekretes</h2>
             <div class="card p-4 flex items-start gap-3">
-                <i class="fa-solid fa-shield text-green-400 text-lg mt-1"></i>
+                <i class="fa-solid fa-shield text-green-400 text-lg mt-1 flex-shrink-0"></i>
                 <div>
-                    <div class="font-bold text-white mb-1">All data lagras lokalt på din enhet.</div>
+                    <div class="font-bold text-white mb-1 text-sm">All data lagras lokalt på din enhet.</div>
                     <div class="text-xs text-slate-500">Ingen data skickas till några servrar.</div>
                 </div>
             </div>
         </div>
 
-        <div class="mb-8">
-            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Farlig zon</h2>
+        <div class="mb-6">
+            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Farlig zon</h2>
             <button onclick="resetAllData()" class="card w-full p-4 flex items-center justify-between hover:bg-red-900/30 transition border border-red-500/20 hover:border-red-500/50">
                 <div class="flex items-center gap-3">
                     <i class="fa-solid fa-trash text-red-400 text-lg"></i>
                     <div class="text-left">
-                        <div class="font-bold text-red-400">Radera all data</div>
+                        <div class="font-bold text-red-400 text-sm">Radera all data</div>
                         <div class="text-xs text-slate-500">Kan inte angras</div>
                     </div>
                 </div>
@@ -273,28 +329,28 @@
             </button>
         </div>
 
-        <div class="text-center text-xs text-slate-600 mt-12">
+        <div class="text-center text-xs text-slate-600 mt-8 pb-4">
             <p>Moodflow v1.0</p>
             <p>Ditt humör, dina insikter</p>
         </div>
     </div>
 
-    <nav class="fixed bottom-6 left-6 right-6 h-16 bg-slate-900/90 backdrop-blur-lg flex justify-around items-center rounded-full border border-white/5 shadow-2xl z-50">
-        <button onclick="showPage('home')" class="nav-item flex flex-col items-center text-blue-400" id="nav-home">
+    <nav class="bg-slate-900/90 backdrop-blur-lg flex justify-around items-center border-t border-white/5 shadow-2xl">
+        <button onclick="showPage('home')" class="nav-item flex flex-col items-center justify-center text-blue-400 flex-1 h-full" id="nav-home">
             <i class="fa-solid fa-house text-lg"></i>
-            <span class="text-[9px] mt-1">Hem</span>
+            <span class="text-[8px] mt-1">Hem</span>
         </button>
-        <button onclick="showPage('log')" class="nav-item flex flex-col items-center text-slate-500" id="nav-log">
+        <button onclick="showPage('log')" class="nav-item flex flex-col items-center justify-center text-slate-500 flex-1 h-full" id="nav-log">
             <i class="fa-solid fa-circle-plus text-2xl"></i>
-            <span class="text-[9px] mt-1">Logga</span>
+            <span class="text-[8px] mt-1">Logga</span>
         </button>
-        <button onclick="showPage('stats')" class="nav-item flex flex-col items-center text-slate-500" id="nav-stats">
+        <button onclick="showPage('stats')" class="nav-item flex flex-col items-center justify-center text-slate-500 flex-1 h-full" id="nav-stats">
             <i class="fa-solid fa-chart-simple text-lg"></i>
-            <span class="text-[9px] mt-1">Statistik</span>
+            <span class="text-[8px] mt-1">Statistik</span>
         </button>
-        <button onclick="showPage('more')" class="nav-item flex flex-col items-center text-slate-500" id="nav-more">
+        <button onclick="showPage('more')" class="nav-item flex flex-col items-center justify-center text-slate-500 flex-1 h-full" id="nav-more">
             <i class="fa-solid fa-gear text-lg"></i>
-            <span class="text-[9px] mt-1">Mer</span>
+            <span class="text-[8px] mt-1">Mer</span>
         </button>
     </nav>
 
@@ -723,6 +779,7 @@
 
         function renderActivitiesStats() {
             const container = document.getElementById('stats-activities-view');
+            const heading = document.getElementById('activities-heading');
             container.innerHTML = '';
             
             // Räkna aktiviteter
@@ -740,9 +797,14 @@
             });
             
             if (Object.keys(activityStats).length === 0) {
-                container.innerHTML = '<p class="text-slate-500 text-sm">Ingen aktivitetsdata ännu</p>';
+                container.style.display = 'none';
+                heading.style.display = 'none';
                 return;
             }
+            
+            // Visa sektionen om det finns data
+            container.style.display = 'block';
+            heading.style.display = 'block';
             
             // Sortera efter frekevens
             const sorted = Object.entries(activityStats).sort((a, b) => b[1].count - a[1].count);

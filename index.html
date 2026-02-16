@@ -3,152 +3,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Moodflow</title>
+    <title>Moodflow Dynamic</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { 
             background-color: #0f172a; 
             color: white; 
-            font-family: -apple-system, system-ui, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
         .card { background-color: #1e293b; border-radius: 1.5rem; }
-        .page { display: none; padding-bottom: 100px; }
+        .page { display: none; padding-bottom: 120px; animation: fadeIn 0.2s ease; }
         .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
-        /* Kalender-specifik stil från bild 3 */
-        .cal-dot { w-1.5 h-1.5 rounded-full bg-slate-700; }
-        .cal-today { 
+        /* Kalender-styling */
+        .day-col { flex: 1; display: flex; flex-col: column; align-items: center; gap: 8px; }
+        .dot { width: 6px; height: 6px; background-color: #334155; border-radius: 9999px; }
+        .today-circle { 
             width: 32px; height: 32px; 
-            border-radius: 9999px; 
+            border-radius: 50%; 
             border: 2px solid #22c55e; 
-            display: flex; items-center; justify-center; 
-            color: #4ade80; font-weight: bold;
+            display: flex; align-items: center; justify-center: center; 
+            color: #4ade80; font-weight: bold; font-size: 0.875rem;
+            background: rgba(34, 197, 94, 0.1);
         }
     </style>
 </head>
 <body>
 
     <div id="home" class="page active p-6">
-        <h1 class="text-4xl font-bold mb-1">God kväll</h1>
-        <p class="text-slate-400 mb-8">Söndag 15 feb</p>
+        <header class="mb-8">
+            <h1 class="text-4xl font-bold mb-1">God kväll</h1>
+            <p id="current-full-date" class="text-slate-400">Måndag 16 feb</p>
+        </header>
 
         <div class="grid grid-cols-3 gap-4 mb-8">
             <div class="card p-4 flex flex-col items-center">
-                <i class="fa-solid fa-droplet text-teal-400 mb-2"></i>
-                <span class="text-2xl font-bold">1</span>
-                <span class="text-[10px] text-slate-500 uppercase">Dagars rad</span>
+                <i class="fa-solid fa-fire text-teal-400 mb-2"></i>
+                <span class="text-2xl font-bold" id="stat-streak">0</span>
+                <span class="text-[10px] text-slate-500 uppercase font-bold">Rad</span>
             </div>
             <div class="card p-4 flex flex-col items-center">
                 <i class="fa-solid fa-chart-line text-orange-400 mb-2"></i>
-                <span class="text-2xl font-bold">7.0</span>
-                <span class="text-[10px] text-slate-500 uppercase">Idag</span>
+                <span class="text-2xl font-bold" id="stat-today">-</span>
+                <span class="text-[10px] text-slate-500 uppercase font-bold">Idag</span>
             </div>
             <div class="card p-4 flex flex-col items-center">
-                <i class="fa-solid fa-calendar text-red-400 mb-2"></i>
-                <span class="text-2xl font-bold">1</span>
-                <span class="text-[10px] text-slate-500 uppercase">Loggar</span>
+                <i class="fa-solid fa-calendar-check text-red-400 mb-2"></i>
+                <span class="text-2xl font-bold" id="stat-total">0</span>
+                <span class="text-[10px] text-slate-500 uppercase font-bold">Loggar</span>
             </div>
         </div>
 
         <div class="card p-6 mb-8">
             <div class="flex justify-between items-center mb-6">
-                <i class="fa-solid fa-chevron-left text-slate-600"></i>
-                <span class="font-bold">9 - 15 Feb</span>
-                <i class="fa-solid fa-chevron-right text-slate-600"></i>
+                <button class="text-slate-600"><i class="fa-solid fa-chevron-left"></i></button>
+                <span id="calendar-week-range" class="font-bold text-sm text-slate-200">9 - 15 Feb</span>
+                <button class="text-slate-600"><i class="fa-solid fa-chevron-right"></i></button>
             </div>
-            <div class="flex justify-between items-center text-center">
-                <div class="flex flex-col items-center gap-3">
-                    <span class="text-xs text-slate-500">Man</span>
-                    <div class="w-1.5 h-1.5 rounded-full bg-slate-700"></div>
-                    <span class="text-xs text-slate-600">9</span>
+            <div id="calendar-days" class="flex justify-between items-end text-center">
                 </div>
-                <div class="flex flex-col items-center gap-3">
-                    <span class="text-xs text-slate-500">Tis</span>
-                    <div class="w-1.5 h-1.5 rounded-full bg-slate-700"></div>
-                    <span class="text-xs text-slate-600">10</span>
-                </div>
-                <div class="flex flex-col items-center gap-3">
-                    <span class="text-xs text-slate-500">Ons</span>
-                    <div class="w-1.5 h-1.5 rounded-full bg-slate-700"></div>
-                    <span class="text-xs text-slate-600">11</span>
-                </div>
-                <div class="flex flex-col items-center gap-3">
-                    <span class="text-xs text-slate-500">Tor</span>
-                    <div class="w-1.5 h-1.5 rounded-full bg-slate-700"></div>
-                    <span class="text-xs text-slate-600">12</span>
-                </div>
-                <div class="flex flex-col items-center gap-3">
-                    <span class="text-xs text-slate-500">Fre</span>
-                    <div class="w-1.5 h-1.5 rounded-full bg-slate-700"></div>
-                    <span class="text-xs text-slate-600">13</span>
-                </div>
-                <div class="flex flex-col items-center gap-3">
-                    <span class="text-xs text-slate-500">Lör</span>
-                    <div class="w-1.5 h-1.5 rounded-full bg-slate-700"></div>
-                    <span class="text-xs text-slate-600">14</span>
-                </div>
-                <div class="flex flex-col items-center gap-2">
-                    <span class="text-xs text-teal-400 font-bold">Son</span>
-                    <div class="w-8 h-8 rounded-full border-2 border-green-500 flex items-center justify-center text-green-400 font-bold text-sm">7</div>
-                    <span class="text-xs text-teal-400 font-bold">15</span>
-                </div>
-            </div>
         </div>
 
         <h2 class="text-xl font-bold mb-4">Senaste loggar</h2>
-        <div class="card p-4 flex items-center justify-between border-l-4 border-green-500">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center text-green-400 font-bold text-lg">
-                    ☀️7
-                </div>
-                <div>
-                    <div class="font-bold">Bra</div>
-                    <div class="text-xs text-slate-500">22:32</div>
-                </div>
-            </div>
-            <i class="fa-solid fa-trash-can text-slate-700"></i>
+        <div id="logs-list" class="flex flex-col gap-3">
+            <p class="text-slate-600 italic text-sm text-center py-4">Inga loggar sparade ännu.</p>
         </div>
     </div>
 
     <div id="log" class="page p-6">
         <h1 class="text-3xl font-bold mb-8">Logga humor</h1>
         <div class="card p-8 text-center mb-8">
-            <p class="text-slate-400 mb-4">Hur mår du?</p>
-            <input type="range" min="1" max="10" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
+            <p class="text-slate-400 mb-6">Hur mår du på en skala 1-10?</p>
+            <div class="flex justify-between mb-4 px-2 text-xl font-bold text-blue-400">
+                <span id="mood-val-display">5</span>
+            </div>
+            <input type="range" id="mood-slider" min="1" max="10" value="5" 
+                oninput="document.getElementById('mood-val-display').innerText = this.value"
+                class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
         </div>
-        <button onclick="showPage('home')" class="w-full bg-slate-200 text-slate-900 font-bold py-4 rounded-2xl">Spara</button>
+        <button onclick="addLog()" class="w-full bg-slate-200 text-slate-900 font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition">
+            Spara logg
+        </button>
     </div>
 
-    <nav class="fixed bottom-0 left-0 right-0 h-20 bg-slate-900/80 backdrop-blur-md flex justify-around items-center border-t border-slate-800">
-        <button onclick="showPage('home')" class="flex flex-col items-center text-blue-400">
-            <i class="fa-solid fa-house text-xl"></i>
-            <span class="text-[10px] mt-1">Hem</span>
+    <nav class="fixed bottom-6 left-6 right-6 h-16 bg-slate-900/90 backdrop-blur-lg flex justify-around items-center rounded-full border border-white/5 shadow-2xl z-50">
+        <button onclick="showPage('home')" class="nav-item flex flex-col items-center text-blue-400" id="nav-home">
+            <i class="fa-solid fa-house text-lg"></i>
+            <span class="text-[9px] mt-1">Hem</span>
         </button>
-        <button onclick="showPage('log')" class="flex flex-col items-center text-slate-500">
-            <i class="fa-solid fa-circle-plus text-3xl"></i>
-            <span class="text-[10px] mt-1">Logga</span>
+        <button onclick="showPage('log')" class="nav-item flex flex-col items-center text-slate-500" id="nav-log">
+            <i class="fa-solid fa-circle-plus text-2xl"></i>
+            <span class="text-[9px] mt-1">Logga</span>
         </button>
-        <button class="flex flex-col items-center text-slate-500">
-            <i class="fa-solid fa-chart-simple text-xl"></i>
-            <span class="text-[10px] mt-1">Statistik</span>
-        </button>
-        <button class="flex flex-col items-center text-slate-500">
-            <i class="fa-solid fa-gear text-xl"></i>
-            <span class="text-[10px] mt-1">Mer</span>
+        <button class="nav-item flex flex-col items-center text-slate-500">
+            <i class="fa-solid fa-chart-simple text-lg"></i>
+            <span class="text-[9px] mt-1">Statistik</span>
         </button>
     </nav>
 
     <script>
+        // --- DATA HANTERING ---
+        let logs = JSON.parse(localStorage.getItem('mood_logs')) || [];
+
+        function init() {
+            renderCalendar();
+            renderLogs();
+            updateStats();
+            
+            // Sätt dagens datum i rubriken
+            const options = { weekday: 'long', day: 'numeric', month: 'short' };
+            document.getElementById('current-full-date').innerText = new Date().toLocaleDateString('sv-SE', options);
+        }
+
+        // --- NAVIGATION ---
         function showPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             
-            // Uppdatera nav-färger
-            document.querySelectorAll('nav button').forEach(btn => btn.classList.replace('text-blue-400', 'text-slate-500'));
-            event.currentTarget.classList.replace('text-slate-500', 'text-blue-400');
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.replace('text-blue-400', 'text-slate-500'));
+            document.getElementById('nav-' + id).classList.replace('text-slate-500', 'text-blue-400');
         }
+
+        // --- KALENDER-LOGIK ---
+        function renderCalendar() {
+            const container = document.getElementById('calendar-days');
+            const rangeLabel = document.getElementById('calendar-week-range');
+            container.innerHTML = '';
+
+            const today = new Date();
+            const currentDayNum = today.getDay(); // 0 (sön) till 6 (lör)
+            const diff = today.getDate() - currentDayNum + (currentDayNum === 0 ? -6 : 1); // Justera till Måndag
+            const monday = new Date(today.setDate(diff));
+
+            const dayNames = ['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön'];
+            let firstDayDate, lastDayDate;
+
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(monday);
+                date.setDate(monday.getDate() + i);
+                
+                const isToday = date.toDateString() === new Date().toDateString();
+                const dayName = dayNames[i];
+                const dayNum = date.getDate();
+
+                if (i === 0) firstDayDate = dayNum;
+                if (i === 6) {
+                    lastDayDate = dayNum;
+                    rangeLabel.innerText = `${firstDayDate} - ${lastDayDate} ${date.toLocaleDateString('sv-SE', {month: 'short'})}`;
+                }
+
+                const dayHtml = `
+                    <div class="day-col">
+                        <span class="text-[10px] ${isToday ? 'text-green-400 font-bold' : 'text-slate-500'}">${dayName}</span>
+                        ${isToday ? 
+                            `<div class="today-circle">${logs.length > 0 && new Date(logs[0].date).toDateString() === date.toDateString() ? logs[0].mood : dayNum}</div>` : 
+                            `<div class="dot"></div>`
+                        }
+                        <span class="text-[10px] ${isToday ? 'text-green-400 font-bold' : 'text-slate-600'}">${dayNum}</span>
+                    </div>
+                `;
+                container.innerHTML += dayHtml;
+            }
+        }
+
+        // --- LOGG-LOGIK ---
+        function addLog() {
+            const mood = document.getElementById('mood-slider').value;
+            const newLog = {
+                id: Date.now(),
+                mood: mood,
+                date: new Date().toISOString(),
+                time: new Date().toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' })
+            };
+
+            logs.unshift(newLog);
+            localStorage.setItem('mood_logs', JSON.stringify(logs));
+            
+            renderLogs();
+            updateStats();
+            renderCalendar();
+            showPage('home');
+        }
+
+        function deleteLog(id) {
+            logs = logs.filter(log => log.id !== id);
+            localStorage.setItem('mood_logs', JSON.stringify(logs));
+            renderLogs();
+            updateStats();
+            renderCalendar();
+        }
+
+        function renderLogs() {
+            const list = document.getElementById('logs-list');
+            list.innerHTML = '';
+
+            if (logs.length === 0) {
+                list.innerHTML = '<p class="text-slate-600 italic text-sm text-center py-4">Inga loggar sparade ännu.</p>';
+                return;
+            }
+
+            logs.forEach(log => {
+                const card = document.createElement('div');
+                card.className = 'card p-4 flex items-center justify-between border-l-4 border-green-500';
+                card.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center text-green-400 font-bold text-lg">
+                            ${log.mood}
+                        </div>
+                        <div>
+                            <div class="font-bold text-slate-200">${log.mood > 7 ? 'Bra' : log.mood > 4 ? 'Okej' : 'Nere'}</div>
+                            <div class="text-[10px] text-slate-500 uppercase font-bold tracking-tight">${log.time}</div>
+                        </div>
+                    </div>
+                    <button onclick="deleteLog(${log.id})" class="p-2 text-slate-700 hover:text-red-400 transition">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function updateStats() {
+            document.getElementById('stat-total').innerText = logs.length;
+            if (logs.length > 0) {
+                document.getElementById('stat-today').innerText = logs[0].mood + ".0";
+                document.getElementById('stat-streak').innerText = "1";
+            } else {
+                document.getElementById('stat-today').innerText = "-";
+                document.getElementById('stat-streak').innerText = "0";
+            }
+        }
+
+        window.onload = init;
     </script>
 </body>
 </html>

@@ -19,15 +19,56 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
         /* Kalender-styling */
-        .day-col { flex: 1; display: flex; flex-col: column; align-items: center; gap: 8px; }
-        .dot { width: 6px; height: 6px; background-color: #334155; border-radius: 9999px; }
+        .day-col { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 8px;
+            padding: 8px;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            background: rgba(30, 41, 59, 0.5);
+        }
+        .day-col:hover {
+            background: rgba(30, 41, 59, 0.8);
+            transform: translateY(-2px);
+        }
+        .dot { 
+            width: 6px; 
+            height: 6px; 
+            background-color: #334155; 
+            border-radius: 9999px; 
+        }
         .today-circle { 
-            width: 32px; height: 32px; 
+            width: 36px; 
+            height: 36px; 
             border-radius: 50%; 
             border: 2px solid #22c55e; 
-            display: flex; align-items: center; justify-center: center; 
-            color: #4ade80; font-weight: bold; font-size: 0.875rem;
-            background: rgba(34, 197, 94, 0.1);
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            color: #4ade80; 
+            font-weight: bold; 
+            font-size: 0.875rem;
+            background: rgba(34, 197, 94, 0.15);
+            box-shadow: 0 0 12px rgba(34, 197, 94, 0.3);
+        }
+        .mood-box {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        .mood-box:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
         }
     </style>
 </head>
@@ -35,7 +76,7 @@
 
     <div id="home" class="page active p-6">
         <header class="mb-8">
-            <h1 class="text-4xl font-bold mb-1">God kväll</h1>
+            <h1 class="text-4xl font-bold mb-1" id="greeting">God kväll</h1>
             <p id="current-full-date" class="text-slate-400">Måndag 16 feb</p>
         </header>
 
@@ -48,7 +89,7 @@
             <div class="card p-4 flex flex-col items-center">
                 <i class="fa-solid fa-chart-line text-orange-400 mb-2"></i>
                 <span class="text-2xl font-bold" id="stat-today">-</span>
-                <span class="text-[10px] text-slate-500 uppercase font-bold">Idag</span>
+                <span class="text-[10px] text-slate-500 uppercase font-bold">Snitt idag</span>
             </div>
             <div class="card p-4 flex flex-col items-center">
                 <i class="fa-solid fa-calendar-check text-red-400 mb-2"></i>
@@ -59,11 +100,11 @@
 
         <div class="card p-6 mb-8">
             <div class="flex justify-between items-center mb-6">
-                <button class="text-slate-600"><i class="fa-solid fa-chevron-left"></i></button>
-                <span id="calendar-week-range" class="font-bold text-sm text-slate-200">9 - 15 Feb</span>
-                <button class="text-slate-600"><i class="fa-solid fa-chevron-right"></i></button>
+                <button onclick="navigateWeek(-1)" class="text-slate-600 hover:text-slate-400 transition hover:scale-110"><i class="fa-solid fa-chevron-left"></i></button>
+                <span id="calendar-week-range" class="font-bold text-sm text-slate-300">9 - 15 Feb</span>
+                <button onclick="navigateWeek(1)" class="text-slate-600 hover:text-slate-400 transition hover:scale-110"><i class="fa-solid fa-chevron-right"></i></button>
             </div>
-            <div id="calendar-days" class="flex justify-between items-end text-center">
+            <div id="calendar-days" class="flex justify-between gap-1">
                 </div>
         </div>
 
@@ -74,19 +115,168 @@
     </div>
 
     <div id="log" class="page p-6">
-        <h1 class="text-3xl font-bold mb-8">Logga humor</h1>
+        <h1 class="text-3xl font-bold mb-1">Logga humor</h1>
+        <p class="text-slate-400 mb-8">Hur mår du just nu?</p>
+        
         <div class="card p-8 text-center mb-8">
-            <p class="text-slate-400 mb-6">Hur mår du på en skala 1-10?</p>
-            <div class="flex justify-between mb-4 px-2 text-xl font-bold text-blue-400">
-                <span id="mood-val-display">5</span>
+            <div class="mb-8">
+                <span class="text-6xl" id="mood-emoji">😐</span>
             </div>
-            <input type="range" id="mood-slider" min="1" max="10" value="5" 
-                oninput="document.getElementById('mood-val-display').innerText = this.value"
-                class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
+            <div class="flex flex-wrap justify-center gap-3 mb-6">
+                <button onclick="selectMood(1)" class="mood-btn w-12 h-12 rounded-full bg-red-900/50 border-2 border-red-700 text-lg font-bold hover:bg-red-800 transition" data-mood="1" title="Väldigt dåligt">😢</button>
+                <button onclick="selectMood(2)" class="mood-btn w-12 h-12 rounded-full bg-red-700/50 border-2 border-red-600 text-lg font-bold hover:bg-red-600 transition" data-mood="2" title="Dåligt">😞</button>
+                <button onclick="selectMood(3)" class="mood-btn w-12 h-12 rounded-full bg-orange-900/50 border-2 border-orange-700 text-lg font-bold hover:bg-orange-800 transition" data-mood="3" title="Mycket dåligt">😔</button>
+                <button onclick="selectMood(4)" class="mood-btn w-12 h-12 rounded-full bg-orange-700/50 border-2 border-orange-600 text-lg font-bold hover:bg-orange-600 transition" data-mood="4" title="Ganska dåligt">😠</button>
+                <button onclick="selectMood(5)" class="mood-btn w-12 h-12 rounded-full bg-yellow-700/50 border-2 border-yellow-600 text-lg font-bold hover:bg-yellow-600 transition" data-mood="5" title="Dåligt">😕</button>
+                <button onclick="selectMood(6)" class="mood-btn w-12 h-12 rounded-full bg-yellow-600/50 border-2 border-yellow-500 text-lg font-bold hover:bg-yellow-500 transition" data-mood="6" title="Neutralt">😐</button>
+                <button onclick="selectMood(7)" class="mood-btn w-12 h-12 rounded-full bg-lime-600/50 border-2 border-lime-500 text-lg font-bold hover:bg-lime-500 transition" data-mood="7" title="Ganska bra">🙂</button>
+                <button onclick="selectMood(8)" class="mood-btn w-12 h-12 rounded-full bg-green-600/50 border-2 border-green-500 text-lg font-bold hover:bg-green-500 transition" data-mood="8" title="Bra">😊</button>
+                <button onclick="selectMood(9)" class="mood-btn w-12 h-12 rounded-full bg-green-700/50 border-2 border-green-600 text-lg font-bold hover:bg-green-600 transition" data-mood="9" title="Mycket bra">😄</button>
+                <button onclick="selectMood(10)" class="mood-btn w-12 h-12 rounded-full bg-green-800/50 border-2 border-green-700 text-lg font-bold hover:bg-green-700 transition" data-mood="10" title="Utmärkt">🤩</button>
+            </div>
         </div>
-        <button onclick="addLog()" class="w-full bg-slate-200 text-slate-900 font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition">
-            Spara logg
+
+        <div class="mb-8">
+            <h2 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Aktiviteter</h2>
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="toggleActivity('Träning')" class="activity-btn h-12 rounded-xl bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-sm font-medium" data-activity="Träning">
+                    <i class="fa-solid fa-dumbbell mr-2"></i>Träning
+                </button>
+                <button onclick="toggleActivity('Jobb')" class="activity-btn h-12 rounded-xl bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-sm font-medium" data-activity="Jobb">
+                    <i class="fa-solid fa-briefcase mr-2"></i>Jobb
+                </button>
+                <button onclick="toggleActivity('Socialt')" class="activity-btn h-12 rounded-xl bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-sm font-medium" data-activity="Socialt">
+                    <i class="fa-solid fa-handshake mr-2"></i>Socialt
+                </button>
+                <button onclick="toggleActivity('Somn')" class="activity-btn h-12 rounded-xl bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-sm font-medium" data-activity="Somn">
+                    <i class="fa-solid fa-moon mr-2"></i>Somn
+                </button>
+                <button onclick="toggleActivity('Mat')" class="activity-btn h-12 rounded-xl bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-sm font-medium" data-activity="Mat">
+                    <i class="fa-solid fa-utensils mr-2"></i>Mat
+                </button>
+                <button onclick="toggleActivity('Natur')" class="activity-btn h-12 rounded-xl bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-sm font-medium" data-activity="Natur">
+                    <i class="fa-solid fa-tree mr-2"></i>Natur
+                </button>
+                <button onclick="toggleActivity('Musik')" class="activity-btn h-12 rounded-xl bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-sm font-medium" data-activity="Musik">
+                    <i class="fa-solid fa-music mr-2"></i>Musik
+                </button>
+                <button onclick="toggleActivity('Läsning')" class="activity-btn h-12 rounded-xl bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-sm font-medium" data-activity="Läsning">
+                    <i class="fa-solid fa-book mr-2"></i>Läsning
+                </button>
+                <button onclick="toggleActivity('Meditation')" class="activity-btn h-12 rounded-xl bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-sm font-medium" data-activity="Meditation">
+                    <i class="fa-solid fa-om mr-2"></i>Meditation
+                </button>
+                <button onclick="toggleActivity('Familj')" class="activity-btn h-12 rounded-xl bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-sm font-medium" data-activity="Familj">
+                    <i class="fa-solid fa-people-group mr-2"></i>Familj
+                </button>
+                <button onclick="toggleActivity('Resor')" class="activity-btn h-12 rounded-xl bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-sm font-medium" data-activity="Resor">
+                    <i class="fa-solid fa-suitcase mr-2"></i>Resor
+                </button>
+                <button onclick="toggleActivity('Spel')" class="activity-btn h-12 rounded-xl bg-slate-700/50 hover:bg-slate-600/70 border border-slate-600 text-slate-300 hover:text-white transition text-sm font-medium" data-activity="Spel">
+                    <i class="fa-solid fa-gamepad mr-2"></i>Spel
+                </button>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h2 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Anteckning</h2>
+            <div class="card p-4">
+                <textarea id="log-note" placeholder="Skriv en kort anteckning (valfritt)..." class="w-full bg-slate-800 border border-slate-700 rounded-lg p-4 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none" rows="4"></textarea>
+                <div class="text-xs text-slate-500 mt-2 text-right"><span id="note-count">0</span>/500</div>
+            </div>
+        </div>
+
+        <button onclick="addLog()" id="save-btn" disabled class="w-full bg-slate-400 text-slate-900 font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed hover:enabled:bg-slate-200">
+            <i class="fa-solid fa-check mr-2"></i>Spara
         </button>
+    </div>
+
+    <div id="stats" class="page p-6">
+        <h1 class="text-3xl font-bold mb-8">Statistik</h1>
+        
+        <div class="grid grid-cols-3 gap-3 mb-8">
+            <div class="card p-4 flex flex-col items-center">
+                <span class="text-xs text-slate-500 uppercase font-bold mb-2">7 dagar</span>
+                <span class="text-2xl font-bold text-green-400" id="stats-avg-7d">-</span>
+                <span class="text-[9px] text-slate-600">Höger</span>
+            </div>
+            <div class="card p-4 flex flex-col items-center">
+                <span class="text-xs text-slate-500 uppercase font-bold mb-2">30 dagar</span>
+                <span class="text-2xl font-bold text-green-400" id="stats-avg-30d">-</span>
+                <span class="text-[9px] text-slate-600">Höger</span>
+            </div>
+            <div class="card p-4 flex flex-col items-center">
+                <span class="text-xs text-slate-500 uppercase font-bold mb-2">Totalt</span>
+                <span class="text-2xl font-bold text-green-400" id="stats-total">0</span>
+                <span class="text-[9px] text-slate-600">Logg(ar)</span>
+            </div>
+        </div>
+
+        <h2 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Humörfördelning</h2>
+        <div class="card p-6 mb-8">
+            <div id="stats-mood-distribution" class="flex items-end justify-between gap-1 h-32"></div>
+        </div>
+
+        <h2 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Aktiviteter & Humör</h2>
+        <div class="card p-6 mb-8" id="stats-activities-view"></div>
+
+        <div class="flex items-start gap-3 bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+            <i class="fa-solid fa-lightbulb text-blue-400 mt-1"></i>
+            <div>
+                <h3 class="font-bold text-white mb-1">Insikter</h3>
+                <p class="text-sm text-slate-400" id="stats-insight">Logga mer data för insikter...</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="more" class="page p-6">
+        <h1 class="text-3xl font-bold mb-8">Inställningar</h1>
+        
+
+        
+        <div class="mb-8">
+            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Data</h2>
+            <button onclick="exportToCSV()" class="card w-full p-4 flex items-center justify-between hover:bg-slate-700/50 transition">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-download text-green-400 text-lg"></i>
+                    <div class="text-left">
+                        <div class="font-bold text-white">Exportera CSV</div>
+                        <div class="text-xs text-slate-500">Loggrar</div>
+                    </div>
+                </div>
+                <i class="fa-solid fa-chevron-right text-slate-600"></i>
+            </button>
+        </div>
+
+        <div class="mb-8">
+            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Sekretes</h2>
+            <div class="card p-4 flex items-start gap-3">
+                <i class="fa-solid fa-shield text-green-400 text-lg mt-1"></i>
+                <div>
+                    <div class="font-bold text-white mb-1">All data lagras lokalt på din enhet.</div>
+                    <div class="text-xs text-slate-500">Ingen data skickas till några servrar.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Farlig zon</h2>
+            <button onclick="resetAllData()" class="card w-full p-4 flex items-center justify-between hover:bg-red-900/30 transition border border-red-500/20 hover:border-red-500/50">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-trash text-red-400 text-lg"></i>
+                    <div class="text-left">
+                        <div class="font-bold text-red-400">Radera all data</div>
+                        <div class="text-xs text-slate-500">Kan inte angras</div>
+                    </div>
+                </div>
+                <i class="fa-solid fa-chevron-right text-slate-600"></i>
+            </button>
+        </div>
+
+        <div class="text-center text-xs text-slate-600 mt-12">
+            <p>Moodflow v1.0</p>
+            <p>Ditt humör, dina insikter</p>
+        </div>
     </div>
 
     <nav class="fixed bottom-6 left-6 right-6 h-16 bg-slate-900/90 backdrop-blur-lg flex justify-around items-center rounded-full border border-white/5 shadow-2xl z-50">
@@ -98,9 +288,13 @@
             <i class="fa-solid fa-circle-plus text-2xl"></i>
             <span class="text-[9px] mt-1">Logga</span>
         </button>
-        <button class="nav-item flex flex-col items-center text-slate-500">
+        <button onclick="showPage('stats')" class="nav-item flex flex-col items-center text-slate-500" id="nav-stats">
             <i class="fa-solid fa-chart-simple text-lg"></i>
             <span class="text-[9px] mt-1">Statistik</span>
+        </button>
+        <button onclick="showPage('more')" class="nav-item flex flex-col items-center text-slate-500" id="nav-more">
+            <i class="fa-solid fa-gear text-lg"></i>
+            <span class="text-[9px] mt-1">Mer</span>
         </button>
     </nav>
 
@@ -109,13 +303,88 @@
         let logs = JSON.parse(localStorage.getItem('mood_logs')) || [];
 
         function init() {
-            renderCalendar();
+            updateGreeting();
+            currentWeekOffset = 0;
+            renderCalendar(0);
             renderLogs();
             updateStats();
+            renderStatsPage();
             
             // Sätt dagens datum i rubriken
             const options = { weekday: 'long', day: 'numeric', month: 'short' };
             document.getElementById('current-full-date').innerText = new Date().toLocaleDateString('sv-SE', options);
+            
+            // Lägg till event-lyssnare för textarea
+            const noteInput = document.getElementById('log-note');
+            if (noteInput) {
+                noteInput.addEventListener('input', function() {
+                    const count = this.value.length;
+                    document.getElementById('note-count').innerText = count;
+                    if (count > 500) {
+                        this.value = this.value.substring(0, 500);
+                        document.getElementById('note-count').innerText = '500';
+                    }
+                });
+            }
+        }
+
+        // --- KALENDER-NAVIGERING ---
+        function navigateWeek(offset) {
+            currentWeekOffset += offset;
+            renderCalendar(currentWeekOffset);
+        }
+
+        // --- VARIABLER ---
+        let selectedMood = null;
+        let selectedActivities = [];
+        let currentWeekOffset = 0;
+
+
+        // --- HÄLSNING ---
+        function getGreeting() {
+            const hour = new Date().getHours();
+            if (hour < 12) return 'God morgon';
+            if (hour < 18) return 'God eftermiddag';
+            return 'God kväll';
+        }
+
+        function updateGreeting() {
+            document.getElementById('greeting').innerText = getGreeting();
+        }
+
+        // --- HUMÖR-VÄLJNING ---
+        const moodEmojis = ['', '😢', '😞', '😔', '😠', '😕', '😐', '🙂', '😊', '😄', '🤩'];
+        const moodLabels = ['', 'Väldigt dåligt', 'Dåligt', 'Mycket dåligt', 'Ganska dåligt', 'Dåligt', 'Neutralt', 'Ganska bra', 'Bra', 'Mycket bra', 'Utmärkt'];
+
+        function selectMood(mood) {
+            selectedMood = mood;
+            document.querySelectorAll('.mood-btn').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-white');
+            });
+            document.querySelector(`[data-mood="${mood}"]`).classList.add('ring-2', 'ring-white');
+            document.getElementById('mood-emoji').innerText = moodEmojis[mood];
+            document.getElementById('save-btn').disabled = false;
+        }
+
+        // --- AKTIVITETS-HANTERING ---
+        function toggleActivity(activity) {
+            const index = selectedActivities.indexOf(activity);
+            if (index > -1) {
+                selectedActivities.splice(index, 1);
+            } else {
+                selectedActivities.push(activity);
+            }
+            
+            document.querySelectorAll('[data-activity]').forEach(btn => {
+                if (btn.dataset.activity === activity) {
+                    btn.classList.toggle('bg-blue-600/70');
+                    btn.classList.toggle('border-blue-500');
+                    btn.classList.toggle('text-white');
+                    btn.classList.toggle('bg-slate-700/50');
+                    btn.classList.toggle('border-slate-600');
+                    btn.classList.toggle('text-slate-300');
+                }
+            });
         }
 
         // --- NAVIGATION ---
@@ -124,19 +393,82 @@
             document.getElementById(id).classList.add('active');
             
             document.querySelectorAll('.nav-item').forEach(btn => btn.classList.replace('text-blue-400', 'text-slate-500'));
-            document.getElementById('nav-' + id).classList.replace('text-slate-500', 'text-blue-400');
+            document.getElementById('nav-' + btn).classList.replace('text-slate-500', 'text-blue-400');
+
+            // Korrekt kod för nav-uppdatering
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.add('text-slate-500'));
+            document.getElementById('nav-' + id).classList.remove('text-slate-500');
+            document.getElementById('nav-' + id).classList.add('text-blue-400');
+
+            if (id === 'stats') {
+                renderStatsPage();
+            }
+            
+
+        }
+        
+
+
+        // --- STRECK-BERÄKNING ---
+        function calculateStreak() {
+            if (logs.length === 0) return 0;
+            
+            let streak = 0;
+            let currentDate = new Date();
+            currentDate.setHours(0, 0, 0, 0);
+
+            for (let i = 0; i < 365; i++) {
+                const dateStr = currentDate.toDateString();
+                const hasLog = logs.some(log => new Date(log.date).toDateString() === dateStr);
+                
+                if (hasLog) {
+                    streak++;
+                } else {
+                    break;
+                }
+                
+                currentDate.setDate(currentDate.getDate() - 1);
+            }
+            
+            return streak;
+        }
+
+        function getBestStreak() {
+            if (logs.length === 0) return 0;
+            
+            let sortedLogs = [...logs].sort((a, b) => new Date(a.date) - new Date(b.date));
+            let bestStreak = 1;
+            let currentStreak = 1;
+
+            for (let i = 1; i < sortedLogs.length; i++) {
+                const prevDate = new Date(sortedLogs[i - 1].date);
+                const currDate = new Date(sortedLogs[i].date);
+                const diffDays = Math.floor((currDate - prevDate) / (1000 * 60 * 60 * 24));
+
+                if (diffDays === 1) {
+                    currentStreak++;
+                    bestStreak = Math.max(bestStreak, currentStreak);
+                } else {
+                    currentStreak = 1;
+                }
+            }
+            
+            return bestStreak;
         }
 
         // --- KALENDER-LOGIK ---
-        function renderCalendar() {
+        function renderCalendar(weekOffset = 0) {
             const container = document.getElementById('calendar-days');
             const rangeLabel = document.getElementById('calendar-week-range');
             container.innerHTML = '';
 
             const today = new Date();
-            const currentDayNum = today.getDay(); // 0 (sön) till 6 (lör)
-            const diff = today.getDate() - currentDayNum + (currentDayNum === 0 ? -6 : 1); // Justera till Måndag
-            const monday = new Date(today.setDate(diff));
+            const currentDayNum = today.getDay();
+            const diff = today.getDate() - currentDayNum + (currentDayNum === 0 ? -6 : 1);
+            const monday = new Date(today.getFullYear(), today.getMonth(), diff);
+            
+            // Applicera vecka-offset
+            monday.setDate(monday.getDate() + (weekOffset * 7));
 
             const dayNames = ['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön'];
             let firstDayDate, lastDayDate;
@@ -155,26 +487,55 @@
                     rangeLabel.innerText = `${firstDayDate} - ${lastDayDate} ${date.toLocaleDateString('sv-SE', {month: 'short'})}`;
                 }
 
-                const dayHtml = `
-                    <div class="day-col">
-                        <span class="text-[10px] ${isToday ? 'text-green-400 font-bold' : 'text-slate-500'}">${dayName}</span>
-                        ${isToday ? 
-                            `<div class="today-circle">${logs.length > 0 && new Date(logs[0].date).toDateString() === date.toDateString() ? logs[0].mood : dayNum}</div>` : 
-                            `<div class="dot"></div>`
-                        }
-                        <span class="text-[10px] ${isToday ? 'text-green-400 font-bold' : 'text-slate-600'}">${dayNum}</span>
-                    </div>
-                `;
+                // Hitta logg för denna dag
+                const dayLog = logs.find(log => new Date(log.date).toDateString() === date.toDateString());
+                const moodValue = dayLog ? dayLog.mood : null;
+                
+                let dayHtml = `<div class="day-col">`;
+                
+                // Dag-namn
+                dayHtml += `<span class="text-xs font-semibold ${isToday ? 'text-green-400' : 'text-slate-500'} uppercase tracking-wider">${dayName}</span>`;
+                
+                // Mood-värde eller tomma prickar
+                if (moodValue) {
+                    let colorClass = 'bg-red-500/25 border-red-400 text-red-100';
+                    if (moodValue > 4 && moodValue <= 6) {
+                        colorClass = 'bg-yellow-500/25 border-yellow-400 text-yellow-100';
+                    } else if (moodValue > 6) {
+                        colorClass = 'bg-green-500/25 border-green-400 text-green-100';
+                    }
+                    
+                    if (isToday) {
+                        dayHtml += `<div class="mood-box ${colorClass} border-2 font-bold text-sm shadow-lg">${moodValue}</div>`;
+                    } else {
+                        dayHtml += `<div class="mood-box ${colorClass} border-2 font-bold text-sm">${moodValue}</div>`;
+                    }
+                } else {
+                    if (isToday) {
+                        dayHtml += `<div class="w-9 h-9 rounded-full border-2 border-green-400 flex items-center justify-center text-green-400 font-bold text-sm" style="background: rgba(34, 197, 94, 0.15); box-shadow: 0 0 12px rgba(34, 197, 94, 0.3);">${dayNum}</div>`;
+                    } else {
+                        dayHtml += `<div class="dot"></div>`;
+                    }
+                }
+                
+                // Dag-nummer
+                dayHtml += `<span class="text-xs font-bold ${isToday ? 'text-green-400' : 'text-slate-400'}">${dayNum}</span>`;
+                dayHtml += `</div>`;
+                
                 container.innerHTML += dayHtml;
             }
         }
 
         // --- LOGG-LOGIK ---
         function addLog() {
-            const mood = document.getElementById('mood-slider').value;
+            if (selectedMood === null) return;
+            
+            const note = document.getElementById('log-note').value;
             const newLog = {
                 id: Date.now(),
-                mood: mood,
+                mood: selectedMood,
+                activities: [...selectedActivities],
+                note: note,
                 date: new Date().toISOString(),
                 time: new Date().toLocaleTimeString('sv-SE', { hour: '2-digit', minute: '2-digit' })
             };
@@ -182,9 +543,25 @@
             logs.unshift(newLog);
             localStorage.setItem('mood_logs', JSON.stringify(logs));
             
+            // Rensa formuläret
+            selectedMood = null;
+            selectedActivities = [];
+            document.querySelectorAll('.mood-btn').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-white');
+            });
+            document.querySelectorAll('.activity-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-600/70', 'border-blue-500', 'text-white');
+                btn.classList.add('bg-slate-700/50', 'border-slate-600', 'text-slate-300');
+            });
+            document.getElementById('mood-emoji').innerText = '😐';
+            document.getElementById('log-note').value = '';
+            document.getElementById('note-count').innerText = '0';
+            document.getElementById('save-btn').disabled = true;
+            
             renderLogs();
             updateStats();
-            renderCalendar();
+            renderCalendar(currentWeekOffset);
+            renderStatsPage();
             showPage('home');
         }
 
@@ -193,7 +570,8 @@
             localStorage.setItem('mood_logs', JSON.stringify(logs));
             renderLogs();
             updateStats();
-            renderCalendar();
+            renderCalendar(currentWeekOffset);
+            renderStatsPage();
         }
 
         function renderLogs() {
@@ -207,33 +585,249 @@
 
             logs.forEach(log => {
                 const card = document.createElement('div');
-                card.className = 'card p-4 flex items-center justify-between border-l-4 border-green-500';
+                
+                let mood_text = '';
+                let emoji = '';
+                let borderColor = 'border-slate-500';
+                let bgColor = 'bg-slate-500/10';
+                let textColor = 'text-slate-300';
+                
+                if (log.mood <= 4) {
+                    mood_text = 'Dåligt';
+                    emoji = '😔';
+                    borderColor = 'border-red-500';
+                    bgColor = 'bg-red-500/10';
+                    textColor = 'text-red-400';
+                } else if (log.mood <= 6) {
+                    mood_text = 'Neutralt';
+                    emoji = '😐';
+                    borderColor = 'border-yellow-500';
+                    bgColor = 'bg-yellow-500/10';
+                    textColor = 'text-yellow-400';
+                } else {
+                    mood_text = 'Bra';
+                    emoji = '😊';
+                    borderColor = 'border-green-500';
+                    bgColor = 'bg-green-500/10';
+                    textColor = 'text-green-400';
+                }
+                
+                card.className = `card p-4 flex flex-col border-l-4 ${borderColor}`;
+                
+                let activitiesHtml = '';
+                if (log.activities && log.activities.length > 0) {
+                    activitiesHtml = `<div class="flex flex-wrap gap-2 mb-3">`;
+                    log.activities.forEach(activity => {
+                        activitiesHtml += `<span class="bg-blue-500/20 border border-blue-400/50 text-blue-300 px-2 py-1 rounded text-xs">${activity}</span>`;
+                    });
+                    activitiesHtml += `</div>`;
+                }
+                
+                let noteHtml = '';
+                if (log.note && log.note.trim()) {
+                    noteHtml = `<p class="text-slate-400 text-sm mb-3 italic">"${log.note}"</p>`;
+                }
+                
                 card.innerHTML = `
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center text-green-400 font-bold text-lg">
-                            ${log.mood}
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-xl ${bgColor} flex items-center justify-center ${textColor} font-bold text-lg">
+                                ${emoji}
+                            </div>
+                            <div>
+                                <div class="font-bold text-slate-200">${mood_text} (${log.mood}/10)</div>
+                                <div class="text-[10px] text-slate-500 uppercase font-bold tracking-tight">${log.time}</div>
+                            </div>
                         </div>
-                        <div>
-                            <div class="font-bold text-slate-200">${log.mood > 7 ? 'Bra' : log.mood > 4 ? 'Okej' : 'Nere'}</div>
-                            <div class="text-[10px] text-slate-500 uppercase font-bold tracking-tight">${log.time}</div>
-                        </div>
+                        <button onclick="deleteLog(${log.id})" class="p-2 text-slate-700 hover:text-red-400 transition">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
                     </div>
-                    <button onclick="deleteLog(${log.id})" class="p-2 text-slate-700 hover:text-red-400 transition">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </button>
+                    ${activitiesHtml}
+                    ${noteHtml}
                 `;
                 list.appendChild(card);
             });
         }
 
         function updateStats() {
+            const streak = calculateStreak();
             document.getElementById('stat-total').innerText = logs.length;
-            if (logs.length > 0) {
-                document.getElementById('stat-today').innerText = logs[0].mood + ".0";
-                document.getElementById('stat-streak').innerText = "1";
+            document.getElementById('stat-streak').innerText = streak;
+            
+            // Beräkna genomsnitt för idag
+            const today = new Date().toDateString();
+            const todayLogs = logs.filter(log => new Date(log.date).toDateString() === today);
+            
+            if (todayLogs.length > 0) {
+                const avgToday = (todayLogs.reduce((sum, log) => sum + log.mood, 0) / todayLogs.length).toFixed(1);
+                document.getElementById('stat-today').innerText = avgToday;
             } else {
                 document.getElementById('stat-today').innerText = "-";
-                document.getElementById('stat-streak').innerText = "0";
+            }
+        }
+
+        // --- STATISTIK-SIDA ---
+        function renderStatsPage() {
+            document.getElementById('stats-total').innerText = logs.length;
+            
+            // Beräkna snitt för olika perioder
+            const avg7d = calculateAverageMood(7);
+            const avg30d = calculateAverageMood(30);
+            
+            document.getElementById('stats-avg-7d').innerText = avg7d;
+            document.getElementById('stats-avg-30d').innerText = avg30d;
+            
+            // Humörfördelning
+            renderMoodDistribution();
+            
+            // Aktiviteter & Humör
+            renderActivitiesStats();
+            
+            // Insikter
+            generateInsight();
+        }
+
+        function calculateAverageMood(days) {
+            const cutoffDate = new Date();
+            cutoffDate.setDate(cutoffDate.getDate() - days);
+            
+            const recentLogs = logs.filter(log => new Date(log.date) >= cutoffDate);
+            if (recentLogs.length === 0) return '-';
+            
+            const avg = (recentLogs.reduce((sum, log) => sum + log.mood, 0) / recentLogs.length).toFixed(1);
+            return avg;
+        }
+
+        function renderMoodDistribution() {
+            const container = document.getElementById('stats-mood-distribution');
+            container.innerHTML = '';
+            
+            const distribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0 };
+            logs.forEach(log => {
+                distribution[log.mood]++;
+            });
+            
+            const maxCount = Math.max(...Object.values(distribution), 1);
+            
+            Object.entries(distribution).forEach(([mood, count]) => {
+                const bar = document.createElement('div');
+                bar.className = 'flex flex-col items-center flex-1';
+                bar.innerHTML = `
+                    <div class="w-full ${count > 0 ? 'bg-green-500/40' : 'bg-slate-700/20'} rounded-t transition" style="height: ${(count / maxCount) * 100}px; min-height: 4px;" title="${mood}: ${count} logg(ar)"></div>
+                    <span class="text-[9px] text-slate-500 mt-2">${mood}</span>
+                `;
+                container.appendChild(bar);
+            });
+        }
+
+        function renderActivitiesStats() {
+            const container = document.getElementById('stats-activities-view');
+            container.innerHTML = '';
+            
+            // Räkna aktiviteter
+            const activityStats = {};
+            logs.forEach(log => {
+                if (log.activities && log.activities.length > 0) {
+                    log.activities.forEach(activity => {
+                        if (!activityStats[activity]) {
+                            activityStats[activity] = { count: 0, totalMood: 0 };
+                        }
+                        activityStats[activity].count++;
+                        activityStats[activity].totalMood += log.mood;
+                    });
+                }
+            });
+            
+            if (Object.keys(activityStats).length === 0) {
+                container.innerHTML = '<p class="text-slate-500 text-sm">Ingen aktivitetsdata ännu</p>';
+                return;
+            }
+            
+            // Sortera efter frekevens
+            const sorted = Object.entries(activityStats).sort((a, b) => b[1].count - a[1].count);
+            
+            sorted.forEach(([activity, stats]) => {
+                const avgMood = (stats.totalMood / stats.count).toFixed(1);
+                const barWidth = (stats.count / sorted[0][1].count) * 100;
+                
+                const item = document.createElement('div');
+                item.className = 'mb-4 last:mb-0';
+                item.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium text-slate-300">${activity}</span>
+                        <span class="text-xs text-slate-500">${avgMood}</span>
+                    </div>
+                    <div class="w-full h-2 bg-slate-700/50 rounded-full overflow-hidden">
+                        <div class="h-full bg-green-500/60" style="width: ${barWidth}%"></div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function generateInsight() {
+            const insightEl = document.getElementById('stats-insight');
+            
+            if (logs.length === 0) {
+                insightEl.innerText = 'Börja logga ditt humör för att få insikter...';
+                return;
+            }
+            
+            // Beräkna olika metriker
+            const avg = (logs.reduce((sum, log) => sum + log.mood, 0) / logs.length).toFixed(1);
+            const trend = logs.length >= 2 ? (logs[0].mood - logs[logs.length - 1].mood) : 0;
+            
+            let insight = '';
+            if (avg >= 7) {
+                insight = `Du verkar må bra! Med ett genomsnitt på ${avg}/10 mår du väl. Fortsätt så!`;
+            } else if (avg >= 5) {
+                insight = `Du mår ganska bra. Ditt genomsnittliga humör är ${avg}/10. Försök identifiera vad som gör skillnad!`;
+            } else {
+                insight = `Ditt humör varierar. Genomsnittet är ${avg}/10. Försök hitta aktiviteter som ökar ditt välmående.`;
+            }
+            
+            insightEl.innerText = insight;
+        }
+
+        // --- EXPORT & RESET ---
+        function exportToCSV() {
+            if (logs.length === 0) {
+                alert('Ingen data att exportera');
+                return;
+            }
+            
+            let csv = 'Datum,Tid,Humör,Aktiviteter,Anteckning\n';
+            logs.forEach(log => {
+                const date = new Date(log.date).toLocaleDateString('sv-SE');
+                const activities = log.activities ? log.activities.join('; ') : '';
+                const note = log.note ? log.note.replace(/"/g, '""') : '';
+                csv += `${date},${log.time},${log.mood},"${activities}","${note}"\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `moodlog_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function resetAllData() {
+            if (confirm('Är du säker? All data kommer att raderas för alltid!')) {
+                logs = [];
+                selectedActivities = [];
+                selectedMood = null;
+                currentWeekOffset = 0;
+                localStorage.removeItem('mood_logs');
+                
+                renderLogs();
+                updateStats();
+                renderCalendar(0);
+                renderStatsPage();
+                alert('All data har raderats.');
+                showPage('home');
             }
         }
 

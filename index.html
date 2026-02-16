@@ -3,83 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Moodflow App</title>
+    <title>Moodflow Full</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { 
-            background-color: #0f172a; 
+            background-color: #0f172a; /* Slate 900 */
             color: white; 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             -webkit-tap-highlight-color: transparent;
             user-select: none;
         }
+        /* Dölj scrollbar */
         ::-webkit-scrollbar { width: 0px; background: transparent; }
-        .card { background-color: #1e293b; border-radius: 1rem; transition: transform 0.1s; }
-        .glass-nav { 
-            background: rgba(15, 23, 42, 0.9); 
-            backdrop-filter: blur(10px); 
-            border-top: 1px solid rgba(255,255,255,0.05);
-        }
-        .page { display: none; animation: fadeIn 0.2s ease-in-out; }
-        .page.active { display: block; }
         
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
+        .card { background-color: #1e293b; border-radius: 1rem; } /* Slate 800 */
+        
+        /* Glassmorphism navigation */
+        .glass-nav { 
+            background: rgba(15, 23, 42, 0.95); 
+            backdrop-filter: blur(12px); 
+            border-top: 1px solid rgba(255,255,255,0.08);
         }
 
-        .mood-btn { transition: all 0.2s; transform-origin: center; }
-        .mood-btn.selected { transform: scale(1.2); border-color: white !important; box-shadow: 0 0 15px rgba(255,255,255,0.3); }
+        /* SPA Pages logic */
+        .page { display: none; padding-bottom: 120px; animation: fadeIn 0.3s ease; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Interaktiva element */
+        .mood-btn { transition: transform 0.2s, background-color 0.2s; }
+        .mood-btn.selected { transform: scale(1.2); border-color: white !important; z-index: 10; }
+        
+        .activity-btn { transition: all 0.2s; }
         .activity-btn.selected { background-color: #3b82f6; border-color: #3b82f6; color: white; }
         .activity-btn.selected i { color: white; }
         
-        /* Kalender styles */
-        .calendar-day.active div { background-color: #2563eb; border: 1px solid #60a5fa; color: white; font-weight: bold; }
-        .calendar-day.active span { color: #60a5fa; font-weight: bold; }
+        .settings-item:active { background-color: #334155; }
     </style>
 </head>
-<body class="pb-28">
+<body class="antialiased">
 
     <div id="home-page" class="page active p-4 pt-8">
         <header class="mb-6">
-            <h1 class="text-3xl font-bold" id="greeting">God kväll</h1>
-            <p class="text-slate-400 capitalize" id="current-date">Laddar datum...</p>
+            <h1 class="text-3xl font-bold">God kväll</h1>
+            <p class="text-slate-400" id="current-date">Laddar datum...</p>
         </header>
 
         <div class="grid grid-cols-3 gap-3 mb-6">
             <div class="card p-3 flex flex-col items-center justify-center h-24">
-                <div class="text-teal-400 mb-1"><i class="fa-solid fa-fire"></i></div>
-                <div class="text-2xl font-bold" id="streak-display">0</div>
+                <div class="text-teal-400 mb-1 text-lg"><i class="fa-solid fa-fire"></i></div>
+                <div class="text-2xl font-bold" id="dash-streak">0</div>
                 <div class="text-xs text-slate-400">Dagars rad</div>
             </div>
             <div class="card p-3 flex flex-col items-center justify-center h-24">
-                <div class="text-orange-400 mb-1"><i class="fa-solid fa-chart-line"></i></div>
-                <div class="text-2xl font-bold" id="avg-today-display">-</div>
+                <div class="text-orange-400 mb-1 text-lg"><i class="fa-solid fa-chart-line"></i></div>
+                <div class="text-2xl font-bold" id="dash-today">-</div>
                 <div class="text-xs text-slate-400">Idag</div>
             </div>
             <div class="card p-3 flex flex-col items-center justify-center h-24">
-                <div class="text-red-400 mb-1"><i class="fa-regular fa-calendar-check"></i></div>
-                <div class="text-2xl font-bold" id="total-logs-display">0</div>
+                <div class="text-red-400 mb-1 text-lg"><i class="fa-regular fa-calendar-check"></i></div>
+                <div class="text-2xl font-bold" id="dash-total">0</div>
                 <div class="text-xs text-slate-400">Loggar</div>
             </div>
         </div>
 
         <div class="card p-4 mb-6">
             <div class="flex justify-between items-center mb-4 px-2">
-                <i class="fa-solid fa-chevron-left text-slate-500 cursor-pointer hover:text-white"></i>
-                <span class="font-semibold" id="week-display">Vecka --</span>
-                <i class="fa-solid fa-chevron-right text-slate-500 cursor-pointer hover:text-white"></i>
+                <i class="fa-solid fa-chevron-left text-slate-500"></i>
+                <span class="font-semibold text-sm">Denna Vecka</span>
+                <i class="fa-solid fa-chevron-right text-slate-500"></i>
             </div>
-            <div class="flex justify-between text-center text-xs opacity-90" id="calendar-days">
-                </div>
+            <div class="flex justify-between text-center text-xs opacity-80">
+                <div class="flex flex-col gap-2"><span>M</span><div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-[10px]">M</div></div>
+                <div class="flex flex-col gap-2"><span>T</span><div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-[10px]">T</div></div>
+                <div class="flex flex-col gap-2"><span>O</span><div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-[10px]">O</div></div>
+                <div class="flex flex-col gap-2"><span>T</span><div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-[10px]">T</div></div>
+                <div class="flex flex-col gap-2"><span>F</span><div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-[10px]">F</div></div>
+                <div class="flex flex-col gap-2"><span>L</span><div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-[10px]">L</div></div>
+                <div class="flex flex-col gap-2 text-white font-bold"><span>S</span><div class="w-8 h-8 rounded-full bg-green-600/20 border border-green-500 text-green-400 flex items-center justify-center">Idag</div></div>
+            </div>
         </div>
 
         <h2 class="text-lg font-semibold mb-3">Senaste loggar</h2>
-        <div id="logs-list" class="flex flex-col gap-3">
-            <div class="text-center text-slate-500 py-8 text-sm italic" id="empty-state">
-                Inga loggar ännu. Tryck på "+" för att börja.
-            </div>
+        <div id="logs-container" class="flex flex-col gap-3 min-h-[100px]">
+            <p class="text-slate-500 text-sm italic text-center mt-8">Inga loggar ännu. Tryck på "+" för att börja.</p>
         </div>
     </div>
 
@@ -91,40 +99,49 @@
 
         <div class="card p-6 mb-4 text-center">
             <div class="flex flex-col items-center mb-6">
-                <div id="mood-icon-display" class="text-4xl text-slate-400 mb-2 transition-colors"><i class="fa-solid fa-circle-minus"></i></div>
-                <span id="mood-text-display" class="text-xl font-semibold tracking-wide">Välj humör</span>
+                <div id="selected-mood-icon" class="text-4xl text-slate-500 mb-2"><i class="fa-solid fa-circle-minus"></i></div>
+                <span id="selected-mood-text" class="text-xl font-semibold tracking-wide text-slate-200">Välj...</span>
             </div>
+            
             <div class="flex justify-between items-end h-14 px-1 gap-1">
-                <button onclick="selectMood(1, 'Urålig', 'red-500')" class="mood-btn w-7 h-7 rounded-full border border-red-500/50 bg-red-500/10 flex items-center justify-center text-[10px] text-slate-300">1</button>
-                <button onclick="selectMood(2, 'Dålig', 'orange-600')" class="mood-btn w-7 h-7 rounded-full border border-orange-600/50 bg-orange-600/10 flex items-center justify-center text-[10px] text-slate-300">2</button>
-                <button onclick="selectMood(3, 'Nere', 'orange-400')" class="mood-btn w-7 h-7 rounded-full border border-orange-400/50 bg-orange-400/10 flex items-center justify-center text-[10px] text-slate-300">3</button>
-                <button onclick="selectMood(4, 'Lite nere', 'yellow-600')" class="mood-btn w-7 h-7 rounded-full border border-yellow-600/50 bg-yellow-600/10 flex items-center justify-center text-[10px] text-slate-300">4</button>
-                <button onclick="selectMood(5, 'Neutral', 'slate-400')" class="mood-btn w-9 h-9 rounded-full bg-slate-600 text-white flex items-center justify-center text-lg shadow-lg z-10 -mb-1"><i class="fa-solid fa-minus"></i></button>
-                <button onclick="selectMood(6, 'Okej', 'green-300')" class="mood-btn w-7 h-7 rounded-full border border-green-300/50 bg-green-300/10 flex items-center justify-center text-[10px] text-slate-300">6</button>
-                <button onclick="selectMood(7, 'Bra', 'green-500')" class="mood-btn w-7 h-7 rounded-full border border-green-500/50 bg-green-500/10 flex items-center justify-center text-[10px] text-slate-300">7</button>
-                <button onclick="selectMood(8, 'Mycket bra', 'teal-400')" class="mood-btn w-7 h-7 rounded-full border border-teal-400/50 bg-teal-400/10 flex items-center justify-center text-[10px] text-slate-300">8</button>
-                <button onclick="selectMood(9, 'Toppen', 'blue-400')" class="mood-btn w-7 h-7 rounded-full border border-blue-400/50 bg-blue-400/10 flex items-center justify-center text-[10px] text-slate-300">9</button>
-                <button onclick="selectMood(10, 'Fantastisk', 'purple-500')" class="mood-btn w-7 h-7 rounded-full border border-purple-500/50 bg-purple-500/10 flex items-center justify-center text-[10px] text-slate-300">10</button>
+                <button onclick="setMood(1, 'Fruktansvärt', 'red-500')" class="mood-btn w-7 h-7 rounded-full border border-red-500/50 bg-red-500/10 text-[10px] text-slate-300">1</button>
+                <button onclick="setMood(2, 'Dåligt', 'orange-600')" class="mood-btn w-7 h-7 rounded-full border border-orange-600/50 bg-orange-600/10 text-[10px] text-slate-300">2</button>
+                <button onclick="setMood(3, 'Nere', 'orange-400')" class="mood-btn w-7 h-7 rounded-full border border-orange-400/50 bg-orange-400/10 text-[10px] text-slate-300">3</button>
+                <button onclick="setMood(4, 'Lite nere', 'yellow-600')" class="mood-btn w-7 h-7 rounded-full border border-yellow-600/50 bg-yellow-600/10 text-[10px] text-slate-300">4</button>
+                
+                <button onclick="setMood(5, 'Neutral', 'slate-400')" class="mood-btn w-9 h-9 rounded-full bg-slate-600 text-white flex items-center justify-center text-lg shadow-lg -mb-1"><i class="fa-solid fa-minus"></i></button>
+                
+                <button onclick="setMood(6, 'Okej', 'green-300')" class="mood-btn w-7 h-7 rounded-full border border-green-300/50 bg-green-300/10 text-[10px] text-slate-300">6</button>
+                <button onclick="setMood(7, 'Bra', 'green-500')" class="mood-btn w-7 h-7 rounded-full border border-green-500/50 bg-green-500/10 text-[10px] text-slate-300">7</button>
+                <button onclick="setMood(8, 'Mycket bra', 'teal-400')" class="mood-btn w-7 h-7 rounded-full border border-teal-400/50 bg-teal-400/10 text-[10px] text-slate-300">8</button>
+                <button onclick="setMood(9, 'Toppen', 'blue-400')" class="mood-btn w-7 h-7 rounded-full border border-blue-400/50 bg-blue-400/10 text-[10px] text-slate-300">9</button>
+                <button onclick="setMood(10, 'Fantastisk', 'purple-500')" class="mood-btn w-7 h-7 rounded-full border border-purple-500/50 bg-purple-500/10 text-[10px] text-slate-300">10</button>
             </div>
         </div>
 
         <div class="mb-2 px-1"><h2 class="text-slate-400 uppercase text-xs font-bold tracking-wider">AKTIVITETER</h2></div>
-        <div class="flex flex-wrap gap-2 mb-6" id="activity-container">
-            <button onclick="toggleActivity(this, 'Träning')" class="activity-btn bg-slate-800 border border-slate-700 px-4 py-2 rounded-full flex items-center gap-2 text-xs font-medium"><i class="fa-solid fa-heart-pulse text-slate-400"></i> Träning</button>
-            <button onclick="toggleActivity(this, 'Jobb')" class="activity-btn bg-slate-800 border border-slate-700 px-4 py-2 rounded-full flex items-center gap-2 text-xs font-medium"><i class="fa-solid fa-briefcase text-slate-400"></i> Jobb</button>
-            <button onclick="toggleActivity(this, 'Socialt')" class="activity-btn bg-slate-800 border border-slate-700 px-4 py-2 rounded-full flex items-center gap-2 text-xs font-medium"><i class="fa-solid fa-users text-slate-400"></i> Socialt</button>
-            <button onclick="toggleActivity(this, 'Sömn')" class="activity-btn bg-slate-800 border border-slate-700 px-4 py-2 rounded-full flex items-center gap-2 text-xs font-medium"><i class="fa-solid fa-moon text-slate-400"></i> Sömn</button>
-            <button onclick="toggleActivity(this, 'Mat')" class="activity-btn bg-slate-800 border border-slate-700 px-4 py-2 rounded-full flex items-center gap-2 text-xs font-medium"><i class="fa-solid fa-utensils text-slate-400"></i> Mat</button>
-            <button onclick="toggleActivity(this, 'Musik')" class="activity-btn bg-slate-800 border border-slate-700 px-4 py-2 rounded-full flex items-center gap-2 text-xs font-medium"><i class="fa-solid fa-music text-slate-400"></i> Musik</button>
+        <div class="grid grid-cols-2 gap-2 mb-6 sm:grid-cols-3">
+            <button onclick="toggleAct(this, 'Träning')" class="activity-btn bg-slate-800 border border-slate-700 px-3 py-3 rounded-xl flex items-center gap-3 text-sm font-medium"><i class="fa-solid fa-heart-pulse text-slate-400"></i> Träning</button>
+            <button onclick="toggleAct(this, 'Jobb')" class="activity-btn bg-slate-800 border border-slate-700 px-3 py-3 rounded-xl flex items-center gap-3 text-sm font-medium"><i class="fa-solid fa-briefcase text-slate-400"></i> Jobb</button>
+            <button onclick="toggleAct(this, 'Socialt')" class="activity-btn bg-slate-800 border border-slate-700 px-3 py-3 rounded-xl flex items-center gap-3 text-sm font-medium"><i class="fa-solid fa-users text-slate-400"></i> Socialt</button>
+            <button onclick="toggleAct(this, 'Sömn')" class="activity-btn bg-slate-800 border border-slate-700 px-3 py-3 rounded-xl flex items-center gap-3 text-sm font-medium"><i class="fa-solid fa-moon text-slate-400"></i> Sömn</button>
+            <button onclick="toggleAct(this, 'Mat')" class="activity-btn bg-slate-800 border border-slate-700 px-3 py-3 rounded-xl flex items-center gap-3 text-sm font-medium"><i class="fa-solid fa-utensils text-slate-400"></i> Mat</button>
+            <button onclick="toggleAct(this, 'Natur')" class="activity-btn bg-slate-800 border border-slate-700 px-3 py-3 rounded-xl flex items-center gap-3 text-sm font-medium"><i class="fa-solid fa-leaf text-slate-400"></i> Natur</button>
+            <button onclick="toggleAct(this, 'Musik')" class="activity-btn bg-slate-800 border border-slate-700 px-3 py-3 rounded-xl flex items-center gap-3 text-sm font-medium"><i class="fa-solid fa-music text-slate-400"></i> Musik</button>
+            <button onclick="toggleAct(this, 'Läsning')" class="activity-btn bg-slate-800 border border-slate-700 px-3 py-3 rounded-xl flex items-center gap-3 text-sm font-medium"><i class="fa-solid fa-book-open text-slate-400"></i> Läsning</button>
+            <button onclick="toggleAct(this, 'Meditation')" class="activity-btn bg-slate-800 border border-slate-700 px-3 py-3 rounded-xl flex items-center gap-3 text-sm font-medium"><i class="fa-solid fa-spa text-slate-400"></i> Meditation</button>
+            <button onclick="toggleAct(this, 'Familj')" class="activity-btn bg-slate-800 border border-slate-700 px-3 py-3 rounded-xl flex items-center gap-3 text-sm font-medium"><i class="fa-solid fa-house-user text-slate-400"></i> Familj</button>
+            <button onclick="toggleAct(this, 'Resor')" class="activity-btn bg-slate-800 border border-slate-700 px-3 py-3 rounded-xl flex items-center gap-3 text-sm font-medium"><i class="fa-solid fa-plane text-slate-400"></i> Resor</button>
+            <button onclick="toggleAct(this, 'Spel')" class="activity-btn bg-slate-800 border border-slate-700 px-3 py-3 rounded-xl flex items-center gap-3 text-sm font-medium"><i class="fa-solid fa-gamepad text-slate-400"></i> Spel</button>
         </div>
 
         <div class="mb-2 px-1"><h2 class="text-slate-400 uppercase text-xs font-bold tracking-wider">ANTECKNING</h2></div>
         <div class="card p-4 mb-6">
-            <textarea id="log-note" class="w-full bg-transparent border-none outline-none text-slate-300 placeholder-slate-600 resize-none text-sm" placeholder="Skriv en kort anteckning (valfritt)..." rows="3"></textarea>
+            <textarea id="note-input" class="w-full bg-transparent border-none outline-none text-slate-300 placeholder-slate-600 resize-none text-sm" placeholder="Skriv en kort anteckning (valfritt)..." rows="3"></textarea>
             <p class="text-right text-xs text-slate-600 mt-2">0/500</p>
         </div>
 
-        <button onclick="saveLog()" class="w-full bg-slate-200 text-slate-900 font-bold py-4 rounded-xl flex items-center justify-center gap-2 active:scale-95 transition shadow-lg shadow-white/5">
+        <button onclick="saveEntry()" class="w-full bg-slate-300 text-slate-900 font-bold py-4 rounded-xl flex items-center justify-center gap-2 active:scale-95 transition">
             <i class="fa-solid fa-check"></i> Spara
         </button>
     </div>
@@ -136,25 +153,218 @@
 
         <div class="grid grid-cols-3 gap-3 mb-6">
             <div class="card p-3 flex flex-col items-center justify-center h-24">
-                <div class="text-xs text-slate-400 mb-1">Medel</div>
-                <div class="text-2xl font-bold text-green-400" id="stat-avg">0.0</div>
+                <div class="text-xs text-slate-400 mb-1">7 dagar</div>
+                <div class="text-2xl font-bold text-green-400" id="stat-7days">-</div>
+                <div class="text-xs text-slate-500">Snitt</div>
             </div>
             <div class="card p-3 flex flex-col items-center justify-center h-24">
-                <div class="text-xs text-slate-400 mb-1">Bästa</div>
-                <div class="text-2xl font-bold text-green-400" id="stat-best">-</div>
+                <div class="text-xs text-slate-400 mb-1">30 dagar</div>
+                <div class="text-2xl font-bold text-green-400" id="stat-30days">-</div>
+                <div class="text-xs text-slate-500">Snitt</div>
             </div>
             <div class="card p-3 flex flex-col items-center justify-center h-24">
                 <div class="text-xs text-slate-400 mb-1">Totalt</div>
-                <div class="text-2xl font-bold text-blue-400" id="stat-count">0</div>
+                <div class="text-2xl font-bold text-blue-400" id="stat-total">0</div>
+                <div class="text-xs text-slate-500">loggar</div>
             </div>
         </div>
-        
+
         <div class="card p-5 mb-4">
-             <h3 class="font-semibold mb-2">Humörfördelning</h3>
-             <div class="h-32 flex items-end justify-between gap-1 border-b border-slate-700 pb-2">
-                 <div class="w-full bg-slate-700 rounded-t h-[10%]"></div>
-                 <div class="w-full bg-slate-700 rounded-t h-[20%]"></div>
-                 <div class="w-full bg-slate-700 rounded-t h-[15%]"></div>
-                 <div class="w-full bg-slate-700 rounded-t h-[5%]"></div>
-                 <div class="w-full bg-slate-700 rounded-t h-[30%]"></div>
-                 <div class="w-
+            <h3 class="font-semibold mb-8 text-sm text-slate-200">Humörfördelning</h3>
+            <div class="flex justify-between items-end h-32 px-2 pb-2 border-b border-slate-700/50 gap-2" id="chart-container">
+                <div class="w-full h-1 bg-slate-700 rounded-t"></div>
+                <div class="w-full h-1 bg-slate-700 rounded-t"></div>
+                <div class="w-full h-1 bg-slate-700 rounded-t"></div>
+                <div class="w-full h-1 bg-slate-700 rounded-t"></div>
+                <div class="w-full h-1 bg-slate-700 rounded-t"></div>
+                <div class="w-full h-1 bg-slate-700 rounded-t"></div>
+                <div class="w-full h-1 bg-slate-700 rounded-t"></div>
+                <div class="w-full h-1 bg-slate-700 rounded-t"></div>
+                <div class="w-full h-1 bg-slate-700 rounded-t"></div>
+                <div class="w-full h-1 bg-slate-700 rounded-t"></div>
+            </div>
+            <div class="flex justify-between text-[10px] text-slate-500 mt-2 px-1 font-mono">
+                <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="settings-page" class="page p-4 pt-8">
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold">Inställningar</h1>
+        </header>
+
+        <div class="mb-2 px-1"><h2 class="text-slate-500 uppercase text-xs font-bold tracking-wider">DATA</h2></div>
+        <div class="card p-4 mb-6 flex items-center justify-between settings-item cursor-pointer">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-lg bg-slate-700/50 flex items-center justify-center text-green-400">
+                    <i class="fa-solid fa-download"></i>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-sm">Exportera CSV</h3>
+                    <p class="text-xs text-slate-500" id="settings-log-count">0 loggar</p>
+                </div>
+            </div>
+            <i class="fa-solid fa-chevron-right text-slate-600 text-xs"></i>
+        </div>
+
+        <div class="mb-2 px-1"><h2 class="text-slate-500 uppercase text-xs font-bold tracking-wider">SEKRETESS</h2></div>
+        <div class="card p-5 mb-6 flex gap-4 bg-slate-800/80">
+            <div class="mt-1"><i class="fa-solid fa-shield-check text-green-500"></i></div>
+            <p class="text-sm text-slate-400 leading-relaxed">
+                All data lagras lokalt på din enhet.<br>
+                Ingen data skickas till några servrar.
+            </p>
+        </div>
+
+        <div class="mb-2 px-1"><h2 class="text-slate-500 uppercase text-xs font-bold tracking-wider">FAROZONEN</h2></div>
+        <div onclick="clearAllData()" class="card p-4 mb-8 flex items-center justify-between settings-item cursor-pointer">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center text-red-400">
+                    <i class="fa-solid fa-trash-can"></i>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-sm text-red-400">Radera all data</h3>
+                    <p class="text-xs text-slate-500">Kan inte ångras</p>
+                </div>
+            </div>
+            <i class="fa-solid fa-chevron-right text-slate-600 text-xs"></i>
+        </div>
+
+        <div class="text-center mt-12 mb-8 opacity-40">
+            <p class="text-xs">Moodflow v1.0</p>
+            <p class="text-xs mt-1">Ditt humör, dina insikter</p>
+        </div>
+    </div>
+
+
+    <nav class="fixed bottom-6 left-6 right-6 glass-nav rounded-full p-2 h-16 flex justify-around items-center shadow-2xl z-50">
+        <button onclick="nav('home')" class="nav-btn w-14 flex flex-col items-center justify-center text-slate-400" id="btn-home">
+            <i class="fa-solid fa-house text-xl mb-1"></i> <span class="text-[9px]">Hem</span>
+        </button>
+        <button onclick="nav('log')" class="nav-btn w-auto px-6 h-10 rounded-full flex flex-col items-center justify-center text-slate-400 transition-colors" id="btn-log">
+            <i class="fa-solid fa-circle-plus text-2xl"></i> <span class="text-[9px] mt-0.5">Logga</span>
+        </button>
+        <button onclick="nav('stats')" class="nav-btn w-14 flex flex-col items-center justify-center text-slate-400" id="btn-stats">
+            <i class="fa-solid fa-chart-simple text-xl mb-1"></i> <span class="text-[9px]">Statistik</span>
+        </button>
+        <button onclick="nav('settings')" class="nav-btn w-14 flex flex-col items-center justify-center text-slate-400" id="btn-settings">
+            <i class="fa-solid fa-gear text-xl mb-1"></i> <span class="text-[9px]">Mer</span>
+        </button>
+    </nav>
+
+    <script>
+        // Start Data (Hämtar från minnet eller startar tom)
+        let logs = JSON.parse(localStorage.getItem('moodflow_data')) || [];
+        
+        // Tillfällig state för nya loggar
+        let newLogState = { mood: null, moodText: '', moodColor: '', acts: [] };
+
+        function init() {
+            // Sätt datum
+            const opts = { weekday: 'long', day: 'numeric', month: 'short' };
+            const dateStr = new Date().toLocaleDateString('sv-SE', opts);
+            document.getElementById('current-date').innerText = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+            
+            updateUI();
+            nav('home');
+        }
+
+        // --- Navigation ---
+        function nav(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId + '-page').classList.add('active');
+            
+            // Update buttons styling
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.classList.remove('text-blue-400', 'bg-slate-700'); 
+                b.classList.add('text-slate-400');
+            });
+
+            const activeBtn = document.getElementById('btn-' + pageId);
+            activeBtn.classList.remove('text-slate-400');
+            activeBtn.classList.add('text-blue-400');
+            
+            if(pageId === 'log') {
+                activeBtn.classList.add('bg-slate-700', 'text-white');
+            }
+        }
+
+        // --- Log Page Functions ---
+        function setMood(val, text, color) {
+            newLogState.mood = val;
+            newLogState.moodText = text;
+            newLogState.moodColor = color;
+            
+            // UI Feedback
+            document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+            
+            document.getElementById('selected-mood-text').innerText = text;
+            // Uppdatera ikon baserat på värde
+            const iconArea = document.getElementById('selected-mood-icon');
+            if(val >= 7) iconArea.innerHTML = `<i class="fa-solid fa-face-smile text-${color.split('-')[0]}-400"></i>`;
+            else if(val >= 4) iconArea.innerHTML = `<i class="fa-solid fa-face-meh text-slate-300"></i>`;
+            else iconArea.innerHTML = `<i class="fa-solid fa-face-frown text-${color.split('-')[0]}-400"></i>`;
+        }
+
+        function toggleAct(btn, name) {
+            btn.classList.toggle('selected');
+            if(newLogState.acts.includes(name)) {
+                newLogState.acts = newLogState.acts.filter(a => a !== name);
+            } else {
+                newLogState.acts.push(name);
+            }
+        }
+
+        function saveEntry() {
+            if(!newLogState.mood) {
+                alert('Välj ett humör först!');
+                return;
+            }
+            
+            const entry = {
+                id: Date.now(),
+                date: new Date().toISOString(),
+                displayTime: new Date().toLocaleTimeString('sv-SE', {hour:'2-digit', minute:'2-digit'}),
+                mood: newLogState.mood,
+                moodText: newLogState.moodText,
+                color: newLogState.moodColor,
+                acts: [...newLogState.acts],
+                note: document.getElementById('note-input').value
+            };
+
+            logs.unshift(entry); // Lägg till överst
+            localStorage.setItem('moodflow_data', JSON.stringify(logs));
+            
+            // Reset
+            newLogState = { mood: null, moodText: '', moodColor: '', acts: [] };
+            document.getElementById('note-input').value = '';
+            document.querySelectorAll('.selected').forEach(e => e.classList.remove('selected'));
+            document.getElementById('selected-mood-text').innerText = 'Välj...';
+            document.getElementById('selected-mood-icon').innerHTML = '<i class="fa-solid fa-circle-minus"></i>';
+            
+            updateUI();
+            nav('home');
+        }
+
+        // --- Update UI (Home, Stats, Settings) ---
+        function updateUI() {
+            // 1. Home Stats
+            document.getElementById('dash-total').innerText = logs.length;
+            document.getElementById('settings-log-count').innerText = logs.length + " loggar";
+            
+            if(logs.length > 0) {
+                const avg = (logs.reduce((a,b) => a + b.mood, 0) / logs.length).toFixed(1);
+                document.getElementById('dash-today').innerText = avg;
+                document.getElementById('dash-streak').innerText = "1"; // Enkel logik
+                
+                // Stats Page
+                document.getElementById('stat-total').innerText = logs.length;
+                document.getElementById('stat-7days').innerText = avg; 
+                document.getElementById('stat-30days').innerText = avg;
+            } else {
+                document.getElementById('dash-today').innerText = "-";
+                document.getElementById('dash-streak').innerText = "0";
+                document.getElementById('stat-total').innerText = "0";
+                document.getElementById('stat-7days').innerText = "-";
